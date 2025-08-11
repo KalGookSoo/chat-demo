@@ -1,16 +1,19 @@
 package kr.me.seesaw.repository;
 
 import kr.me.seesaw.entity.Message;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-public interface MessageRepository extends JpaRepository<Message, Long> {
-    // Find messages by senderId
+public interface MessageRepository extends Repository<Message, Long> {
+
+    Message save(Message message);
+
+    Optional<Message> findById(Long id);
+
     List<Message> findBySenderId(String senderId);
     
-    // Find latest messages with limit
     List<Message> findTop100ByOrderByTimestampDesc();
+
 }
