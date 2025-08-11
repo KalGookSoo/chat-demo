@@ -1,5 +1,8 @@
 package kr.me.seesaw;
 
+import kr.me.seesaw.entity.Message;
+import kr.me.seesaw.repository.MessageRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -12,11 +15,14 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RequiredArgsConstructor
 public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+
+    private final MessageRepository messageRepository;
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
@@ -27,9 +33,13 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) {
-
         String payload = message.getPayload();
         logger.info("페이로드: {}", payload);
+
+        Message chatMessage = new Message(payload, session.getId());
+        messageRepository.save(chatMessage);
+        logger.info("메시지 저장됨: {}", chatMessage);
+
         TextMessage broadcastMessage = new TextMessage(payload);
         sessions.values()
                 .stream()

@@ -1,5 +1,7 @@
 package kr.me.seesaw;
 
+import kr.me.seesaw.repository.MessageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
@@ -7,9 +9,12 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
+
+    private final MessageRepository messageRepository;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -19,7 +24,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Bean
     public WebSocketHandler chatWebSocketHandler() {
-        return new ChatWebSocketHandler();
+        return new ChatWebSocketHandler(messageRepository);
     }
 
 }
