@@ -5,12 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-enum Role{
-    CUSTOMER,
-    LAWYER,
-    ADMIN
-}
-
 @Entity
 @Table(name = "members")
 @Getter
@@ -38,6 +32,12 @@ public class User {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public enum Role {
+        CUSTOMER,
+        LAWYER,
+        ADMIN
     }
 
 }
