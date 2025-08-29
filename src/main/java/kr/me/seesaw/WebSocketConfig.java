@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kr.me.seesaw.repository.MessageRepository;
+import kr.me.seesaw.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final MessageRepository messageRepository;
 
+    private final NotificationService notificationService;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler(), "/")
@@ -28,7 +31,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Bean
     public WebSocketHandler chatWebSocketHandler() {
-        return new ChatWebSocketHandler(messageRepository, objectMapper());
+        return new ChatWebSocketHandler(messageRepository, objectMapper(), notificationService);
     }
 
     @Bean

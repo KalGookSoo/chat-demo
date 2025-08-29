@@ -1,19 +1,21 @@
 package kr.me.seesaw.repository;
 
 import kr.me.seesaw.entity.Message;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface MessageRepository extends Repository<Message, Long> {
+public interface MessageRepository extends Repository<Message, String> {
 
-    Message save(Message message);
+    void save(Message message);
 
-    Optional<Message> findById(Long id);
+    Optional<Message> findById(String id);
 
     List<Message> findBySenderId(String senderId);
     
-    List<Message> findTop100ByOrderByTimestampDesc();
+    Page<Message> findAll(Pageable pageable);
 
 }
