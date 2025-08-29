@@ -1,6 +1,7 @@
 package kr.me.seesaw.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
@@ -13,20 +14,15 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-
 @Entity
-@Table(name = "tb_user_role_mapping")
-@Comment("계정 역할 매핑")
+@Table(name = "tb_chat_room")
+@Comment("채팅방")
 @DynamicInsert
 @DynamicUpdate
-public class UserRoleMapping extends BaseEntity {
+public class ChatRoom extends BaseEntity {
 
-    @Column(length = 36, nullable = false)
-    @Comment("계정 식별자")
-    private String userId;
+    @Comment("이름")
+    private String name;
 
-    @Column(length = 36, nullable = false)
-    @Comment("역할 식별자")
-    private String roleId;
 
 }

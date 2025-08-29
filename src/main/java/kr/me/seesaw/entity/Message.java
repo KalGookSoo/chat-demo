@@ -1,25 +1,20 @@
 package kr.me.seesaw.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PROTECTED;
 
-
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-
 @Entity
 @Table(name = "tb_message")
 @Comment("메시지")
@@ -27,10 +22,33 @@ import static lombok.AccessLevel.PROTECTED;
 @DynamicUpdate
 public class Message extends BaseEntity {
 
-    @Column(nullable = false)
-    private String content;
+    @Column(length = 36, nullable = false)
+    @Comment("발신자 식별자")
+    private String senderId;
+
+    @Column(length = 36, nullable = false)
+    @Comment("채팅방 식별자")
+    private String chatRoomId;
 
     @Column(nullable = false)
-    private String senderId;
+    @Comment("메시지 본문")
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Comment("메시지 타입")
+    private MessageType type = MessageType.TEXT;
+
+    @Column
+    @Comment("콘텐츠 타입: text/plain, application/json, image/png 등")
+    private String contentType;
+
+    public Message(String content, String senderId, String chatRoomId, MessageType type, String contentType) {
+        this.content = content;
+        this.senderId = senderId;
+        this.chatRoomId = chatRoomId;
+        this.type = type;
+        this.contentType = contentType;
+    }
 
 }

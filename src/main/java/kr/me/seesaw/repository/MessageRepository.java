@@ -15,7 +15,9 @@ public interface MessageRepository extends Repository<Message, String> {
     Optional<Message> findById(String id);
 
     List<Message> findBySenderId(String senderId);
-    
+
     Page<Message> findAll(Pageable pageable);
+
+    Page<Message> findAllByChatRoomId(String chatRoomId, Pageable pageable);
 
 }
