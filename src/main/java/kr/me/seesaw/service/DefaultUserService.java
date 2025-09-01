@@ -40,4 +40,15 @@ public class DefaultUserService implements UserService {
         userRoleMappingRepository.save(userRoleMapping2);
     }
 
+    @Override
+    public void createUser(String username, String password, String name) {
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = User.create(username, encodedPassword, name);
+        userRepository.save(user);
+        Role role = new Role("ROLE_CLIENT", "의뢰인");
+        roleRepository.save(role);
+        UserRoleMapping userRoleMapping = new UserRoleMapping(user.getId(), role.getId());
+        userRoleMappingRepository.save(userRoleMapping);
+    }
+
 }

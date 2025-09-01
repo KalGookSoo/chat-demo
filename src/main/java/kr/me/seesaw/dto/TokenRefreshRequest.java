@@ -1,16 +1,14 @@
 package kr.me.seesaw.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * 토큰 갱신 요청 명령
  */
+@ToString
+@EqualsAndHashCode
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TokenRefreshRequest {

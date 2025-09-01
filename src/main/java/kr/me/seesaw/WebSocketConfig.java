@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kr.me.seesaw.repository.MessageRepository;
+import kr.me.seesaw.security.JwtHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -20,17 +20,19 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final MessageRepository messageRepository;
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(chatWebSocketHandler(stringRedisTemplate), "/")
+        registry.addHandler(chatWebSocketHandler(messageRepository, objectMapper()), "/chat")
+                .addInterceptors(jwtHandshakeInterceptor)
                 .setAllowedOrigins("*");
     }
 
     @Bean
-    public ChatWebSocketHandler chatWebSocketHandler(StringRedisTemplate stringRedisTemplate) {
-        return new ChatWebSocketHandler(messageRepository, objectMapper(), stringRedisTemplate);
+    public ChatWebSocketHandler chatWebSocketHandler(MessageRepository messageRepository, ObjectMapper objectMapper) {
+        return new ChatWebSocketHandler(messageRepository, objectMapper);
     }
 
     @Bean
