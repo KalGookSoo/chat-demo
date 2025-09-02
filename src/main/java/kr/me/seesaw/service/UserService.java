@@ -1,9 +1,15 @@
 package kr.me.seesaw.service;
 
-public interface UserService {
+import kr.me.seesaw.domain.User;
 
+import java.util.List;
+
+public interface UserService {
     void createDemoUsers();
 
     void createUser(String username, String password, String name);
 
+    User getUserByUsername(String username);
+
+    List<User> getAllUsers();
 }

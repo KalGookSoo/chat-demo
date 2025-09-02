@@ -1,11 +1,7 @@
 package kr.me.seesaw.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
@@ -14,8 +10,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -24,14 +20,12 @@ import static lombok.AccessLevel.PROTECTED;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true, exclude = "roles")
 @ToString(callSuper = true, exclude = "roles")
-
 @Entity
 @Table(name = "tb_user")
 @Comment("계정")
 @DynamicInsert
 @DynamicUpdate
 public class User extends BaseEntity {
-
     @Column(unique = true, nullable = false)
     @Comment("계정명")
     private String username;
@@ -46,10 +40,6 @@ public class User extends BaseEntity {
     @Comment("연락처")
     private String contactNumber;
 
-    @Transient
-    @JsonManagedReference
-    private List<Role> roles = new ArrayList<>();
-
     @Comment("만료 일시")
     private LocalDateTime expiredDate;
 
@@ -58,6 +48,15 @@ public class User extends BaseEntity {
 
     @Comment("패스워드 만료 일시")
     private LocalDateTime credentialsExpiredDate;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "tb_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
+    public void addRole(Role role) {
+        roles.add(role);
+        role.getUsers().add(this);
+    }
 
     public static User create(String username, String password, String name) {
         User user = new User();
@@ -100,9 +99,4 @@ public class User extends BaseEntity {
     public boolean isCredentialsNonExpired() {
         return credentialsExpiredDate == null || credentialsExpiredDate.isAfter(LocalDateTime.now());
     }
-
-    public void addRole(Role role) {
-        roles.add(role);
-    }
-
 }

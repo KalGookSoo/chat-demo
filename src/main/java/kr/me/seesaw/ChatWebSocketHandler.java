@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 public class ChatWebSocketHandler extends AbstractWebSocketHandler {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final MessageRepository messageRepository;
@@ -131,5 +130,4 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         logger.info("연결 종료: {}, 상태: {}", session.getId(), status);
         super.afterConnectionClosed(session, status);
     }
-
 }
