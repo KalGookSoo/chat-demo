@@ -1,6 +1,6 @@
 package kr.me.seesaw.repository;
 
-import kr.me.seesaw.entity.User;
+import kr.me.seesaw.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

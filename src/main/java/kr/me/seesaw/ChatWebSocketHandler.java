@@ -2,8 +2,8 @@ package kr.me.seesaw;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.me.seesaw.entity.Message;
-import kr.me.seesaw.entity.MessageType;
+import kr.me.seesaw.domain.Message;
+import kr.me.seesaw.domain.MessageType;
 import kr.me.seesaw.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -35,39 +35,38 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws IOException {
         sessions.put(session.getId(), session);
-        if (session.getAttributes().get("authentication") instanceof Authentication authentication) {
-            URI uri = session.getUri();
-            if (uri == null) {
-                session.close(CloseStatus.BAD_DATA.withReason("URI가 없습니다."));
-                return;
-            }
-
-            // QueryParams로 채팅방 식별
-            String chatRoomId = UriComponentsBuilder.fromUri(uri)
-                    .build()
-                    .getQueryParams()
-                    .getFirst("chatRoomId");
-
-            // 세션에서 사용자 정보 식별
-            String content = "선수 입장: " + authentication.getName();
-
-            // 알림
-            Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, "text/plain");
-//            messageRepository.save(message);
-            try {
-                String jsonMessages = objectMapper.writeValueAsString(Map.of("message", message));
-                TextMessage textMessage = new TextMessage(jsonMessages);
-                session.sendMessage(textMessage);
-            } catch (JsonProcessingException e) {
-                logger.error("메시지 JSON 변환 실패: {}", e.getMessage());
-            } catch (IOException e) {
-                logger.error("메시지 전송 실패: {}", e.getMessage());
-            }
-
-            // TODO 서비스 워커 알림
+        if (!(session.getAttributes().get("authentication") instanceof Authentication authentication)) {
+            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("계정 인증 실패"));
             return;
         }
-        session.close(CloseStatus.NOT_ACCEPTABLE.withReason("계정 인증 실패"));
+        URI uri = session.getUri();
+        if (uri == null) {
+            session.close(CloseStatus.BAD_DATA.withReason("URI가 없습니다."));
+            return;
+        }
+
+        // QueryParams로 채팅방 식별
+        String chatRoomId = UriComponentsBuilder.fromUri(uri)
+                .build()
+                .getQueryParams()
+                .getFirst("chatRoomId");
+
+        // 세션에서 사용자 정보 식별
+        String content = "선수 입장: " + authentication.getName();
+
+        // 알림
+        Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, "text/plain");
+        try {
+            String jsonMessages = objectMapper.writeValueAsString(Map.of("message", message));
+            TextMessage textMessage = new TextMessage(jsonMessages);
+            session.sendMessage(textMessage);
+        } catch (JsonProcessingException e) {
+            logger.error("메시지 JSON 변환 실패: {}", e.getMessage());
+        } catch (IOException e) {
+            logger.error("메시지 전송 실패: {}", e.getMessage());
+        }
+
+        // TODO 서비스 워커 알림
     }
 
     @Override
@@ -87,6 +86,8 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 .build()
                 .getQueryParams()
                 .getFirst("chatRoomId");
+
+
 
         String payload = textMessage.getPayload();
         Message message = new Message(payload, authentication.getName(), chatRoomId, MessageType.TEXT, "text/plain");

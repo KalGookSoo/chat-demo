@@ -1,6 +1,6 @@
 package kr.me.seesaw.repository;
 
-import kr.me.seesaw.entity.Role;
+import kr.me.seesaw.domain.Role;
 import org.springframework.data.repository.Repository;
 
 import java.util.Collection;

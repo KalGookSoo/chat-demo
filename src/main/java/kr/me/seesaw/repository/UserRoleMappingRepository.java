@@ -1,6 +1,6 @@
 package kr.me.seesaw.repository;
 
-import kr.me.seesaw.entity.UserRoleMapping;
+import kr.me.seesaw.domain.UserRoleMapping;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;

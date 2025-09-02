@@ -1,4 +1,4 @@
-package kr.me.seesaw.entity;
+package kr.me.seesaw.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

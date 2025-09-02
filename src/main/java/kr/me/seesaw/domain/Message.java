@@ -1,4 +1,4 @@
-package kr.me.seesaw.entity;
+package kr.me.seesaw.domain;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;

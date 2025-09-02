@@ -1,4 +1,4 @@
-package kr.me.seesaw.entity;
+package kr.me.seesaw.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;

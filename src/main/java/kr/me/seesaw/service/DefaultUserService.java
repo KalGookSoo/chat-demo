@@ -1,8 +1,8 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.entity.Role;
-import kr.me.seesaw.entity.User;
-import kr.me.seesaw.entity.UserRoleMapping;
+import kr.me.seesaw.domain.Role;
+import kr.me.seesaw.domain.User;
+import kr.me.seesaw.domain.UserRoleMapping;
 import kr.me.seesaw.repository.RoleRepository;
 import kr.me.seesaw.repository.UserRepository;
 import kr.me.seesaw.repository.UserRoleMappingRepository;

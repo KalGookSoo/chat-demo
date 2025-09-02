@@ -1,7 +1,7 @@
 package kr.me.seesaw.dto;
 
-import kr.me.seesaw.entity.Role;
-import kr.me.seesaw.entity.User;
+import kr.me.seesaw.domain.Role;
+import kr.me.seesaw.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
