@@ -34,6 +34,7 @@ public class DefaultChatRoomService implements ChatRoomService {
         return chatRoom;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ChatRoom> getAllChatRooms() {
         return chatRoomRepository.findAll();
@@ -49,5 +50,11 @@ public class DefaultChatRoomService implements ChatRoomService {
         ChatRoomMember chatRoomMember = new ChatRoomMember(chatRoom, user.getId());
         chatRoom.addMember(chatRoomMember);
         entityManager.persist(chatRoomMember);
+    }
+
+    @Override
+    public ChatRoom getChatRoom(String chatRoomId) {
+        return Optional.ofNullable(entityManager.find(ChatRoom.class, chatRoomId))
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채팅방입니다. id: " + chatRoomId));
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     @Override
     public JsonWebToken authenticate(SignInRequest request) {
         // 사용자 조회

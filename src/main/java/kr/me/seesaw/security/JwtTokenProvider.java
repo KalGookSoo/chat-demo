@@ -41,21 +41,21 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        String accessToken = generateAccessToken(userPrincipal.getUsername(), authorities);
-        String refreshToken = generateRefreshToken(userPrincipal.getUsername());
+        String accessToken = generateAccessToken(userPrincipal.getUserId(), authorities);
+        String refreshToken = generateRefreshToken(userPrincipal.getUserId());
         return new JsonWebToken(accessToken, refreshToken, ACCESS_TOKEN_EXPIRATION);
     }
 
     /**
      * 계정 인증 주체 정보를 암호화한 액세스 토큰을 반환합니다.
      */
-    private String generateAccessToken(String username, Collection<String> authorities) {
+    private String generateAccessToken(String userId, Collection<String> authorities) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(userId)
                 .claim("authorities", authorities)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -66,13 +66,13 @@ public class JwtTokenProvider {
     /**
      * 리프레시 토큰을 생성합니다.
      */
-    private String generateRefreshToken(String username) {
+    private String generateRefreshToken(String userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(userId)
                 .setId(UUID.randomUUID().toString()) // 토큰 ID 설정
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -97,8 +97,8 @@ public class JwtTokenProvider {
                 .parseClaimsJws(refreshToken)
                 .getBody();
 
-        // 사용자명 추출
-        String username = claims.getSubject();
+        // 계정 식별자 추출
+        String userId = claims.getSubject();
 
         // 기존 액세스 토큰에서 권한 정보 추출을 위해 인증 객체 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -114,10 +114,10 @@ public class JwtTokenProvider {
         }
 
         // 새로운 액세스 토큰 생성
-        String newAccessToken = generateAccessToken(username, authorities);
+        String newAccessToken = generateAccessToken(userId, authorities);
 
         // 새로운 리프레시 토큰 생성 (선택적)
-        String newRefreshToken = generateRefreshToken(username);
+        String newRefreshToken = generateRefreshToken(userId);
 
         return new JsonWebToken(newAccessToken, newRefreshToken, ACCESS_TOKEN_EXPIRATION);
     }
@@ -138,7 +138,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
 
-            String username = claims.getSubject();
+            String userId = claims.getSubject();
             List<?> authoritiesList = claims.get("authorities", List.class);
 
             Collection<GrantedAuthority> authorities = authoritiesList.stream()
@@ -146,7 +146,7 @@ public class JwtTokenProvider {
                     .collect(Collectors.toList());
 
             // 인증된 사용자 정보를 담은 Authentication 객체 생성
-            return new UsernamePasswordAuthenticationToken(username, null, authorities);
+            return new UsernamePasswordAuthenticationToken(userId, null, authorities);
         } catch (SignatureException e) {
             throw new BadCredentialsException("유효하지 않은 JWT 서명입니다.");
         } catch (MalformedJwtException e) {

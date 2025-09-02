@@ -12,4 +12,6 @@ public interface ChatRoomService {
     List<ChatRoom> getAllChatRooms();
 
     void addMember(String id, String memberId);
+
+    ChatRoom getChatRoom(String chatRoomId);
 }
