@@ -41,12 +41,4 @@ public class ChatRoom extends BaseEntity {
             member.setChatRoom(this);
         }
     }
-
-    @EqualsAndHashCode
-    @ToString
-    @AllArgsConstructor
-    @Getter
-    public static class Id {
-        private String id;
-    }
 }

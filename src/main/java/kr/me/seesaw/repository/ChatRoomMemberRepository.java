@@ -4,11 +4,10 @@ import kr.me.seesaw.domain.ChatRoomMember;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatRoomMemberRepository extends Repository<ChatRoomMember, String> {
+    Optional<ChatRoomMember> findByChatRoomIdAndUserId(String chatRoomId, String userId);
 
-    void save(ChatRoomMember chatRoomMember);
-
-    List<ChatRoomMember> findAllByChatRoomId(String chatRoomId);
-
+    List<ChatRoomMember> findAllByUserId(String userId);
 }

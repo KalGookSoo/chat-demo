@@ -14,7 +14,7 @@ import static lombok.AccessLevel.PROTECTED;
 @EqualsAndHashCode(callSuper = true, exclude = {"chatRoom"})
 @ToString(callSuper = true, exclude = {"chatRoom"})
 @Entity
-@Table(name = "tb_chat_room_member")
+@Table(name = "tb_chat_room_member", uniqueConstraints = @UniqueConstraint(columnNames = {"chat_room_id", "user_id"}))
 @Comment("채팅방 계정 매핑")
 @DynamicInsert
 @DynamicUpdate

@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import kr.me.seesaw.domain.ChatRoom;
 import kr.me.seesaw.domain.ChatRoomMember;
 import kr.me.seesaw.domain.User;
+import kr.me.seesaw.dto.ChatRoomResponse;
+import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
 
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
+
     @Override
     public void createDemoChatRooms() {
         createChatRoom("채팅방1");
@@ -28,7 +32,7 @@ public class DefaultChatRoomService implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom createChatRoom(String name) {
+    public void createChatRoom(String name) {
         ChatRoom chatRoom = new ChatRoom(name);
         entityManager.persist(chatRoom);
         return chatRoom;
@@ -53,8 +57,11 @@ public class DefaultChatRoomService implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom getChatRoom(String chatRoomId) {
-        return Optional.ofNullable(entityManager.find(ChatRoom.class, chatRoomId))
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채팅방입니다. id: " + chatRoomId));
+    public List<ChatRoomResponse> getChatRoomsByUserId(String userId) {
+        List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByUserId(userId);
+        return chatRoomMembers.stream()
+                .map(ChatRoomMember::getChatRoom)
+                .map(chatRoom -> new ChatRoomResponse(chatRoom.getId(), chatRoom.getName()))
+                .toList();
     }
 }
