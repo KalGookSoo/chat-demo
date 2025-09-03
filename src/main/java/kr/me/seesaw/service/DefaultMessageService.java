@@ -14,8 +14,8 @@ public class DefaultMessageService implements MessageService {
     private final EntityManager entityManager;
 
     @Override
-    public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String contentType) {
-        Message message = new Message(content, senderId, chatRoomId, MessageType.TEXT, "text/plain");
+    public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
+        Message message = new Message(content, senderId, chatRoomId, type, mimeType);
         entityManager.persist(message);
         return message;
     }

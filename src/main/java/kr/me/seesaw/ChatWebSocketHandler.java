@@ -1,6 +1,7 @@
 package kr.me.seesaw;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import kr.me.seesaw.domain.Message;
@@ -9,6 +10,7 @@ import kr.me.seesaw.service.MessageService;
 import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.CloseStatus;
@@ -104,13 +106,15 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
         // 채팅방 내 메시지 목록
         String payload = textMessage.getPayload();
+        JsonNode jsonNode = objectMapper.readTree(payload);
+        String content = jsonNode.findValue("payload").asText();
         if (chatRoomId == null || chatRoomId.isBlank()) {
             session.close(CloseStatus.BAD_DATA.withReason("chatRoomId가 없습니다."));
             return;
         }
 
         // 메시지 영속화
-        Message message = messageService.createMessage(payload, authentication.getName(), chatRoomId, MessageType.TEXT, "text/plain");
+        Message message = messageService.createMessage(content, authentication.getName(), chatRoomId, MessageType.MESSAGE, MediaType.TEXT_PLAIN_VALUE);
 
         // 같은 채팅방에만 전송
         chatSessionManager.broadcastToRoom(chatRoomId, message);

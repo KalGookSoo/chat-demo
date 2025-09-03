@@ -37,18 +37,18 @@ public class Message extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Comment("메시지 타입")
-    private MessageType type = MessageType.TEXT;
+    private MessageType type;
 
     @Column
-    @Comment("콘텐츠 타입: text/plain, application/json, image/png 등")
-    private String contentType;
+    @Comment("미디어 타입")
+    private String mimeType;
 
-    public Message(String content, String senderId, String chatRoomId, MessageType type, String contentType) {
+    public Message(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
         this.content = content;
         this.senderId = senderId;
         this.chatRoomId = chatRoomId;
         this.type = type;
-        this.contentType = contentType;
+        this.mimeType = mimeType;
     }
 
 }
