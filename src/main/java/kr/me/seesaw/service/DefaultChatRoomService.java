@@ -35,7 +35,6 @@ public class DefaultChatRoomService implements ChatRoomService {
     public void createChatRoom(String name) {
         ChatRoom chatRoom = new ChatRoom(name);
         entityManager.persist(chatRoom);
-        return chatRoom;
     }
 
     @Transactional(readOnly = true)

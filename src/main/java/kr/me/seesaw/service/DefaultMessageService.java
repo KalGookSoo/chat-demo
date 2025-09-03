@@ -35,7 +35,7 @@ public class DefaultMessageService implements MessageService {
 
     @Override
     public Page<MessageResponse> getMessagesByChatRoomId(String chatRoomId) {
-        Sort sort = Sort.by(Sort.Order.desc("createdDate"));
+        Sort sort = Sort.by(Sort.Order.asc("createdDate"));
         PageRequest pageRequest = PageRequest.of(0, 30, sort);
         Page<Message> page = messageRepository.findAllByChatRoomId(chatRoomId, pageRequest);
         List<MessageResponse> messageResponses = page.getContent()
