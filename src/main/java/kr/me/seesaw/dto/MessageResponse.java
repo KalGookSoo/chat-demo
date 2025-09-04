@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 public class MessageResponse implements Serializable {
     private String id;
 
-    private String senderId;
-
     private String chatRoomId;
 
     private String content;
@@ -25,4 +23,6 @@ public class MessageResponse implements Serializable {
     private String mimeType;
 
     private LocalDateTime createdDate;
+
+    private SenderResponse sender;
 }

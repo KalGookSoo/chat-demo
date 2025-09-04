@@ -2,6 +2,7 @@ package kr.me.seesaw.service;
 
 import kr.me.seesaw.domain.User;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface UserService {
@@ -12,4 +13,6 @@ public interface UserService {
     User getUserByUsername(String username);
 
     List<User> getAllUsers();
+
+    List<User> getUsersById(Collection<String> userIds);
 }

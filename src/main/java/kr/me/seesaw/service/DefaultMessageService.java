@@ -1,9 +1,12 @@
 package kr.me.seesaw.service;
 
 import jakarta.persistence.EntityManager;
+import kr.me.seesaw.domain.BaseEntity;
 import kr.me.seesaw.domain.Message;
 import kr.me.seesaw.domain.MessageType;
+import kr.me.seesaw.domain.User;
 import kr.me.seesaw.dto.MessageResponse;
+import kr.me.seesaw.dto.SenderResponse;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +17,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -25,6 +32,8 @@ public class DefaultMessageService implements MessageService {
     private final MessageRepository messageRepository;
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
+
+    private final UserService userService;
 
     @Override
     public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
@@ -38,19 +47,28 @@ public class DefaultMessageService implements MessageService {
         Sort sort = Sort.by(Sort.Order.asc("createdDate"));
         PageRequest pageRequest = PageRequest.of(0, 30, sort);
         Page<Message> page = messageRepository.findAllByChatRoomId(chatRoomId, pageRequest);
+        Collection<String> userIds = page.getContent()
+                .stream()
+                .map(Message::getSenderId)
+                .toList();
+
+        Map<String, User> users = userService.getUsersById(userIds)
+                .stream()
+                .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
         List<MessageResponse> messageResponses = page.getContent()
                 .stream()
                 .map(message ->
                         new MessageResponse(
                                 message.getId(),
-                                message.getSenderId(),
                                 message.getChatRoomId(),
                                 message.getContent(),
                                 message.getType(),
                                 message.getMimeType(),
-                                message.getCreatedDate()
+                                message.getCreatedDate(),
+                                new SenderResponse(message.getId(), users.get(message.getSenderId()).getName())
                         )
                 ).toList();
+
         return new PageImpl<>(messageResponses, page.getPageable(), page.getTotalElements());
     }
 
