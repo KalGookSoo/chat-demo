@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +40,7 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        String accessToken = generateAccessToken(userPrincipal.getUserId(), authorities);
+        String accessToken = generateAccessToken(userPrincipal.getUserId(), userPrincipal.getUsername(), authorities);
         String refreshToken = generateRefreshToken(userPrincipal.getUserId());
         return new JsonWebToken(accessToken, refreshToken, ACCESS_TOKEN_EXPIRATION);
     }
@@ -49,13 +48,14 @@ public class JwtTokenProvider {
     /**
      * 계정 인증 주체 정보를 암호화한 액세스 토큰을 반환합니다.
      */
-    private String generateAccessToken(String userId, Collection<String> authorities) {
+    private String generateAccessToken(String userId, String username, Collection<String> authorities) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
 
         return Jwts.builder()
                 .setSubject(userId)
+                .claim("username", username)
                 .claim("authorities", authorities)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -100,21 +100,19 @@ public class JwtTokenProvider {
         // 계정 식별자 추출
         String userId = claims.getSubject();
 
-        // 기존 액세스 토큰에서 권한 정보 추출을 위해 인증 객체 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Collection<String> authorities;
+        String username = claims.get("username", String.class);
 
-        if (authentication != null && authentication.getAuthorities() != null) {
-            authorities = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-        } else {
-            // 인증 정보가 없는 경우 빈 권한 목록 사용
+        Object authorities = claims.get("authorities");
+
+        if (authorities == null) {
             authorities = Collections.emptyList();
+        } else if (!(authorities instanceof Collection)) {
+            throw new BadCredentialsException("authorities가 Collection이 아닙니다.");
         }
 
         // 새로운 액세스 토큰 생성
-        String newAccessToken = generateAccessToken(userId, authorities);
+        @SuppressWarnings("noinspection unchecked")
+        String newAccessToken = generateAccessToken(userId, username, (Collection<String>) authorities);
 
         // 새로운 리프레시 토큰 생성 (선택적)
         String newRefreshToken = generateRefreshToken(userId);
