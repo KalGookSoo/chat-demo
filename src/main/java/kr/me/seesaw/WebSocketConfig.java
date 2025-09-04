@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kr.me.seesaw.security.JwtHandshakeInterceptor;
 import kr.me.seesaw.service.MessageService;
+import kr.me.seesaw.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,22 +18,22 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
-
     private final MessageService messageService;
+
+    private final UserService userService;
 
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
-
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(chatWebSocketHandler(messageService, objectMapper()), "/chat")
+        registry.addHandler(chatWebSocketHandler(objectMapper()), "/chat")
                 .addInterceptors(jwtHandshakeInterceptor)
                 .setAllowedOrigins("*");
     }
 
     @Bean
-    public ChatWebSocketHandler chatWebSocketHandler(MessageService messageService, ObjectMapper objectMapper) {
-        return new ChatWebSocketHandler(messageService, objectMapper);
+    public ChatWebSocketHandler chatWebSocketHandler(ObjectMapper objectMapper) {
+        return new ChatWebSocketHandler(messageService, userService, objectMapper);
     }
 
     @Bean
@@ -43,5 +44,4 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
     }
-
 }

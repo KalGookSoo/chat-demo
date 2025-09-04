@@ -1,13 +1,19 @@
 package kr.me.seesaw;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import kr.me.seesaw.domain.Message;
 import kr.me.seesaw.domain.MessageType;
+import kr.me.seesaw.domain.User;
+import kr.me.seesaw.dto.MessageResponse;
+import kr.me.seesaw.dto.SenderResponse;
 import kr.me.seesaw.service.MessageService;
-import lombok.*;
+import kr.me.seesaw.service.UserService;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -31,6 +37,8 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     private final MessageService messageService;
 
+    private final UserService userService;
+
     private final ObjectMapper objectMapper;
 
     private ChatSessionManager chatSessionManager;
@@ -41,14 +49,14 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(@NonNull WebSocketSession session) throws IOException {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) {
         if (!(session.getAttributes().get("authentication") instanceof Authentication authentication)) {
-            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("계정 인증 실패"));
+            logger.warn("연결 수립 중 인증 정보를 찾을 수 없습니다. sessionId={}", session.getId());
             return;
         }
         URI uri = session.getUri();
         if (uri == null) {
-            session.close(CloseStatus.BAD_DATA.withReason("URI가 없습니다."));
+            logger.warn("연결 수립 중 URI가 없습니다. sessionId={}", session.getId());
             return;
         }
 
@@ -59,7 +67,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 .getFirst("chatRoomId");
 
         if (chatRoomId == null || chatRoomId.isBlank()) {
-            session.close(CloseStatus.BAD_DATA.withReason("chatRoomId가 없습니다."));
+            logger.warn("연결 수립 중 chatRoomId가 없습니다. sessionId={}", session.getId());
             return;
         }
 
@@ -68,20 +76,10 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         // 세션 등록
         chatSessionManager.addSession(session, userId, chatRoomId);
 
-        // 세션에서 사용자 정보 식별
-        String content = "선수 입장: " + authentication.getName();
-
-        // 알림 (본인에게만 환영 메시지)
-        Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, "text/plain");
-        try {
-            String jsonMessages = objectMapper.writeValueAsString(Map.of("message", message));
-            TextMessage textMessage = new TextMessage(jsonMessages);
-            session.sendMessage(textMessage);
-        } catch (JsonProcessingException e) {
-            logger.error("메시지 JSON 변환 실패: {}", e.getMessage());
-        } catch (IOException e) {
-            logger.error("메시지 전송 실패: {}", e.getMessage());
-        }
+        // 알림
+//        String content = "선수 입장: " + authentication.getName();
+//        Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
+//        chatSessionManager.broadcastToRoom(chatRoomId, message);
 
         // TODO 서비스 워커 알림
     }
@@ -89,12 +87,12 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage textMessage) throws IOException {
         if (!(session.getAttributes().get("authentication") instanceof Authentication authentication)) {
-            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("계정 인증 실패"));
+            logger.warn("인증 정보 부재로 메시지를 처리할 수 없습니다. sessionId={}", session.getId());
             return;
         }
         URI uri = session.getUri();
         if (uri == null) {
-            session.close(CloseStatus.BAD_DATA.withReason("URI가 없습니다."));
+            logger.warn("URI 부재로 메시지를 처리할 수 없습니다. sessionId={}", session.getId());
             return;
         }
 
@@ -104,20 +102,26 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 .getQueryParams()
                 .getFirst("chatRoomId");
 
-        // 채팅방 내 메시지 목록
-        String payload = textMessage.getPayload();
-        JsonNode jsonNode = objectMapper.readTree(payload);
-        String content = jsonNode.findValue("payload").asText();
         if (chatRoomId == null || chatRoomId.isBlank()) {
-            session.close(CloseStatus.BAD_DATA.withReason("chatRoomId가 없습니다."));
+            logger.warn("chatRoomId 부재로 메시지를 처리할 수 없습니다. sessionId={}", session.getId());
             return;
         }
 
         // 메시지 영속화
-        Message message = messageService.createMessage(content, authentication.getName(), chatRoomId, MessageType.MESSAGE, MediaType.TEXT_PLAIN_VALUE);
+        Message message = messageService.createMessage(textMessage.getPayload(), authentication.getName(), chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
 
-        // 같은 채팅방에만 전송
-        chatSessionManager.broadcastToRoom(chatRoomId, message);
+        User user = userService.getUserById(message.getSenderId());
+        MessageResponse messageResponse = new MessageResponse(
+                message.getId(),
+                message.getChatRoomId(),
+                message.getContent(),
+                message.getType(),
+                message.getMimeType(),
+                message.getCreatedDate(),
+                new SenderResponse(message.getId(), user.getName())
+        );
+        String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
+        chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
 
         // TODO 서비스 워커 알림
         // TODO 채팅방에 메시지 전송
@@ -127,22 +131,44 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) throws Exception {
-        logger.error("오류 발생: {}", exception.getMessage());
-        super.handleTransportError(session, exception);
+        UserSession info = chatSessionManager.getSessionInfo(session.getId());
+        String userId = info != null ? info.getUserId() : "unknown";
+        String chatRoomId = info != null ? info.getChatRoomId() : "unknown";
+        logger.error("전송 오류 - sessionId={}, userId={}, chatRoomId={}, exception={} : {}",
+                session.getId(), userId, chatRoomId, exception.getClass().getSimpleName(), exception.getMessage());
+        if (exception instanceof IOException) {
+            // IO 오류 시 세션 정리
+            chatSessionManager.removeSession(session);
+        }
     }
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
         UserSession userSession = chatSessionManager.removeSession(session);
         if (userSession != null) {
-            logger.info("연결 종료: {}, 상태: {}", userSession, status);
+            int code = status.getCode();
+            if (code == CloseStatus.NO_CLOSE_FRAME.getCode()) {
+                logger.warn("비정상 종료(1006/NO_CLOSE_FRAME): {}, 상태: {}", userSession, status);
+            } else {
+                logger.info("연결 종료: {}, 상태: {}", userSession, status);
+            }
 
             // 알림 전송
             String exitMessage = "선수 퇴장: " + userSession.getUserId();
-            Message message = new Message(exitMessage, userSession.getUserId(), userSession.getChatRoomId(), MessageType.NOTIFICATION, "text/plain");
-            chatSessionManager.broadcastToRoom(userSession.getChatRoomId(), message);
+            Message message = new Message(exitMessage, userSession.getUserId(), userSession.getChatRoomId(), MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
+            User user = userService.getUserById(message.getSenderId());
+            MessageResponse messageResponse = new MessageResponse(
+                    message.getId(),
+                    message.getChatRoomId(),
+                    message.getContent(),
+                    message.getType(),
+                    message.getMimeType(),
+                    message.getCreatedDate(),
+                    new SenderResponse(message.getId(), user.getName())
+            );
+            String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
+            chatSessionManager.broadcastToRoom(userSession.getChatRoomId(), broadcastMessage);
         }
-        super.afterConnectionClosed(session, status);
     }
 
     @RequiredArgsConstructor
@@ -222,39 +248,30 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         /**
          * 특정 채팅방의 모든 세션에 메시지 전송
          */
-        public void broadcastToRoom(String chatRoomId, Message message) {
+        public void broadcastToRoom(String chatRoomId, String textMessage) {
             Set<WebSocketSession> sessions = sessionSetByChatRoomId.get(chatRoomId);
             if (sessions == null || sessions.isEmpty()) {
                 logger.debug("채팅방에 활성 세션이 없음: {}", chatRoomId);
                 return;
             }
 
-            try {
-                String jsonMessage = objectMapper.writeValueAsString(Map.of("message", message));
-                TextMessage textMessage = new TextMessage(jsonMessage);
+            List<WebSocketSession> closedSessions = new ArrayList<>();
 
-                List<WebSocketSession> closedSessions = new ArrayList<>();
-
-                for (WebSocketSession session : sessions) {
-                    if (session.isOpen()) {
-                        try {
-                            session.sendMessage(textMessage);
-                        } catch (IOException e) {
-                            logger.error("메시지 전송 실패 - 세션ID: {}, 오류: {}",
-                                    session.getId(), e.getMessage());
-                            closedSessions.add(session);
-                        }
-                    } else {
+            for (WebSocketSession session : sessions) {
+                if (session.isOpen()) {
+                    try {
+                        session.sendMessage(new TextMessage(textMessage));
+                    } catch (IOException e) {
+                        logger.error("메시지 전송 실패 - 세션ID: {}, 오류: {}", session.getId(), e.getMessage());
                         closedSessions.add(session);
                     }
+                } else {
+                    closedSessions.add(session);
                 }
-
-                // 끊어진 세션들 정리
-                closedSessions.forEach(this::removeSession);
-
-            } catch (JsonProcessingException e) {
-                logger.error("메시지 JSON 변환 실패: {}", e.getMessage());
             }
+
+            // 끊어진 세션들 정리
+            closedSessions.forEach(this::removeSession);
         }
 
         /**
@@ -285,6 +302,8 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                                         } catch (IOException e) {
                                             logger.error("사용자별 메시지 전송 실패 - 사용자: {}, 세션ID: {}, 오류: {}",
                                                     userId, sessionId, e.getMessage());
+                                            // 전송 실패 세션 정리
+                                            removeSession(session);
                                         }
                                     });
                         }
