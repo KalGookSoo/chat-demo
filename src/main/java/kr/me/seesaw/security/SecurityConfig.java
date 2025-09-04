@@ -28,14 +28,8 @@ import java.util.Collections;
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
-    private final String secretKey;
-
-    public SecurityConfig(@Value("${jwt.secret.key}") String secretKey) {
-        this.secretKey = secretKey;
-    }
-
     @Bean
-    public JwtTokenProvider jwtTokenProvider() {
+    public JwtTokenProvider jwtTokenProvider(@Value("${jwt.secret.key}") String secretKey) {
         return new JwtTokenProvider(secretKey);
     }
 

@@ -14,7 +14,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class JwtTokenProvider {
                 .toList();
 
         String accessToken = generateAccessToken(userPrincipal.getUserId(), userPrincipal.getUsername(), authorities);
-        String refreshToken = generateRefreshToken(userPrincipal.getUserId());
+        String refreshToken = generateRefreshToken(userPrincipal.getUserId(), userPrincipal.getUsername(), authorities);
         return new JsonWebToken(accessToken, refreshToken, ACCESS_TOKEN_EXPIRATION);
     }
 
@@ -66,14 +68,16 @@ public class JwtTokenProvider {
     /**
      * 리프레시 토큰을 생성합니다.
      */
-    private String generateRefreshToken(String userId) {
+    private String generateRefreshToken(String userId, String username, Collection<String> authorities) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
 
         return Jwts.builder()
                 .setSubject(userId)
-                .setId(UUID.randomUUID().toString()) // 토큰 ID 설정
+                .claim("username", username)
+                .claim("authorities", authorities)
+                .setId(UUID.randomUUID().toString())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -102,20 +106,17 @@ public class JwtTokenProvider {
 
         String username = claims.get("username", String.class);
 
-        Object authorities = claims.get("authorities");
-
-        if (authorities == null) {
-            authorities = Collections.emptyList();
-        } else if (!(authorities instanceof Collection)) {
-            throw new BadCredentialsException("authorities가 Collection이 아닙니다.");
+        @SuppressWarnings("noinspection unchecked")
+        Collection<String> authorities = claims.get("authorities", Collection.class);
+        if (authorities == null || authorities.isEmpty()) {
+            throw new BadCredentialsException("유효하지 않은 리프레시 토큰입니다.");
         }
 
         // 새로운 액세스 토큰 생성
-        @SuppressWarnings("noinspection unchecked")
-        String newAccessToken = generateAccessToken(userId, username, (Collection<String>) authorities);
+        String newAccessToken = generateAccessToken(userId, username, authorities);
 
         // 새로운 리프레시 토큰 생성 (선택적)
-        String newRefreshToken = generateRefreshToken(userId);
+        String newRefreshToken = generateRefreshToken(userId, username, authorities);
 
         return new JsonWebToken(newAccessToken, newRefreshToken, ACCESS_TOKEN_EXPIRATION);
     }
@@ -137,14 +138,14 @@ public class JwtTokenProvider {
                     .getBody();
 
             String userId = claims.getSubject();
-            List<?> authoritiesList = claims.get("authorities", List.class);
+            Collection<?> authorities = claims.get("authorities", Collection.class);
 
-            Collection<GrantedAuthority> authorities = authoritiesList.stream()
+            Collection<GrantedAuthority> grantedAuthorities = authorities.stream()
                     .map(authority -> new SimpleGrantedAuthority(authority.toString()))
                     .collect(Collectors.toList());
 
             // 인증된 사용자 정보를 담은 Authentication 객체 생성
-            return new UsernamePasswordAuthenticationToken(userId, null, authorities);
+            return new UsernamePasswordAuthenticationToken(userId, null, grantedAuthorities);
         } catch (SignatureException e) {
             throw new BadCredentialsException("유효하지 않은 JWT 서명입니다.");
         } catch (MalformedJwtException e) {
