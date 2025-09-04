@@ -81,6 +81,7 @@ public class SecurityConfig {
     private void handleAuthorizeHttpRequests(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry config) {
         config.requestMatchers("/favicon.ico").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .anyRequest()
                 .permitAll();
