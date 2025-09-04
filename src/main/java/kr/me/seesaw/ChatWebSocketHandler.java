@@ -49,7 +49,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(@NonNull WebSocketSession session) {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) throws JsonProcessingException {
         if (!(session.getAttributes().get("authentication") instanceof Authentication authentication)) {
             logger.warn("연결 수립 중 인증 정보를 찾을 수 없습니다. sessionId={}", session.getId());
             return;
@@ -71,15 +71,26 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             return;
         }
 
-        String userId = authentication.getName();
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username);
 
         // 세션 등록
-        chatSessionManager.addSession(session, userId, chatRoomId);
+        chatSessionManager.addSession(session, user.getId(), chatRoomId);
 
         // 알림
-//        String content = "선수 입장: " + authentication.getName();
-//        Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
-//        chatSessionManager.broadcastToRoom(chatRoomId, message);
+        String content = "선수 입장: " + user.getName();
+        Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
+        MessageResponse messageResponse = new MessageResponse(
+                message.getId(),
+                message.getChatRoomId(),
+                message.getContent(),
+                message.getType(),
+                message.getMimeType(),
+                message.getCreatedDate(),
+                new SenderResponse(message.getId(), user.getName())
+        );
+        String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
+        chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
 
         // TODO 서비스 워커 알림
     }
@@ -108,9 +119,9 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         }
 
         // 메시지 영속화
-        Message message = messageService.createMessage(textMessage.getPayload(), authentication.getName(), chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
+        User user = userService.getUserByUsername(authentication.getName());
+        Message message = messageService.createMessage(textMessage.getPayload(), user.getId(), chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
 
-        User user = userService.getUserById(message.getSenderId());
         MessageResponse messageResponse = new MessageResponse(
                 message.getId(),
                 message.getChatRoomId(),
@@ -154,9 +165,9 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             }
 
             // 알림 전송
-            String exitMessage = "선수 퇴장: " + userSession.getUserId();
+            User user = userService.getUserById(userSession.getUserId());
+            String exitMessage = "선수 퇴장: " + user.getName();
             Message message = new Message(exitMessage, userSession.getUserId(), userSession.getChatRoomId(), MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
-            User user = userService.getUserById(message.getSenderId());
             MessageResponse messageResponse = new MessageResponse(
                     message.getId(),
                     message.getChatRoomId(),

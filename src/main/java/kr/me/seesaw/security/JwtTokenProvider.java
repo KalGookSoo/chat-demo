@@ -137,7 +137,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
 
-            String userId = claims.getSubject();
+            String username = claims.get("username", String.class);
             Collection<?> authorities = claims.get("authorities", Collection.class);
 
             Collection<GrantedAuthority> grantedAuthorities = authorities.stream()
@@ -145,7 +145,7 @@ public class JwtTokenProvider {
                     .collect(Collectors.toList());
 
             // 인증된 사용자 정보를 담은 Authentication 객체 생성
-            return new UsernamePasswordAuthenticationToken(userId, null, grantedAuthorities);
+            return new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
         } catch (SignatureException e) {
             throw new BadCredentialsException("유효하지 않은 JWT 서명입니다.");
         } catch (MalformedJwtException e) {
