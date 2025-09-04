@@ -9,6 +9,7 @@ import kr.me.seesaw.dto.MessageResponse;
 import kr.me.seesaw.dto.SenderResponse;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.MessageRepository;
+import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,7 +34,7 @@ public class DefaultMessageService implements MessageService {
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
@@ -52,7 +53,7 @@ public class DefaultMessageService implements MessageService {
                 .map(Message::getSenderId)
                 .toList();
 
-        Map<String, User> users = userService.getUsersById(userIds)
+        Map<String, User> users = userRepository.findAllByIdIn(userIds)
                 .stream()
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
         List<MessageResponse> messageResponses = page.getContent()

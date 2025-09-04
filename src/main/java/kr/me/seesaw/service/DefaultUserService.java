@@ -8,8 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
@@ -47,17 +45,5 @@ public class DefaultUserService implements UserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다. username: " + username));
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<User> getUsersById(Collection<String> userIds) {
-        return userRepository.findAllByIdIn(userIds);
     }
 }
