@@ -63,7 +63,7 @@ public class DefaultMessageService implements MessageService {
                                 message.getType(),
                                 message.getMimeType(),
                                 message.getCreatedDate(),
-                                new SenderResponse(message.getId(), users.get(message.getSenderId()).getName())
+                                new SenderResponse(message.getSenderId(), users.get(message.getSenderId()).getName())
                         )
                 ).toList();
 
