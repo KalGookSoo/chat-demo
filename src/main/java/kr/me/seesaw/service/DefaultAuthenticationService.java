@@ -1,5 +1,6 @@
 package kr.me.seesaw.service;
 
+import kr.me.seesaw.domain.Role;
 import kr.me.seesaw.domain.User;
 import kr.me.seesaw.dto.JsonWebToken;
 import kr.me.seesaw.dto.SignInRequest;
@@ -14,6 +15,8 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +55,8 @@ public class DefaultAuthenticationService implements AuthenticationService {
         }
 
         // 액세스 토큰과 리프레시 토큰 생성
-        return jwtTokenProvider.generateTokenInfo(userPrincipal);
+        List<String> authorities = user.getRoles().stream().map(Role::getName).toList();
+        return jwtTokenProvider.generateTokenInfo(user.getId(), user.getUsername(), authorities);
     }
 
     @Override

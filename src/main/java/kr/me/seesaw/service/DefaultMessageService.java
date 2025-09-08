@@ -1,6 +1,5 @@
 package kr.me.seesaw.service;
 
-import jakarta.persistence.EntityManager;
 import kr.me.seesaw.domain.BaseEntity;
 import kr.me.seesaw.domain.Message;
 import kr.me.seesaw.domain.MessageType;
@@ -28,8 +27,6 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class DefaultMessageService implements MessageService {
-    private final EntityManager entityManager;
-
     private final MessageRepository messageRepository;
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
@@ -39,7 +36,7 @@ public class DefaultMessageService implements MessageService {
     @Override
     public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
         Message message = new Message(content, senderId, chatRoomId, type, mimeType);
-        entityManager.persist(message);
+        messageRepository.save(message);
         return message;
     }
 

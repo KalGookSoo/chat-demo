@@ -24,7 +24,9 @@ public class ChatRoomApiController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<Map<String, List<ChatRoomResponse>>> getChatRooms() {
-        String userId = principalProvider.getAuthentication().getName();
+        String userId = principalProvider.getAuthentication()
+                .getDetails()
+                .toString();
         List<ChatRoomResponse> chatRooms = chatRoomService.getChatRoomsByUserId(userId);
         return ResponseEntity.ok(Map.of("chatRooms", chatRooms));
     }

@@ -4,7 +4,6 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import kr.me.seesaw.dto.JsonWebToken;
-import kr.me.seesaw.dto.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,20 +29,9 @@ public class JwtTokenProvider {
     // 리프레시 토큰 만료 시간: 14일
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 14;
 
-    /**
-     * 사용자 정보를 기반으로 액세스 토큰과 리프레시 토큰을 생성합니다.
-     *
-     * @param userPrincipal 사용자 정보
-     * @return 토큰 정보 객체
-     */
-    public JsonWebToken generateTokenInfo(UserPrincipal userPrincipal) {
-        Collection<String> authorities = userPrincipal.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-
-        String accessToken = generateAccessToken(userPrincipal.getUserId(), userPrincipal.getUsername(), authorities);
-        String refreshToken = generateRefreshToken(userPrincipal.getUserId(), userPrincipal.getUsername(), authorities);
+    public JsonWebToken generateTokenInfo(String userId, String username, Collection<String> authorities) {
+        String accessToken = generateAccessToken(userId, username, authorities);
+        String refreshToken = generateRefreshToken(userId, username, authorities);
         return new JsonWebToken(accessToken, refreshToken, ACCESS_TOKEN_EXPIRATION);
     }
 
@@ -137,6 +125,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
 
+            String userId = claims.getSubject();
             String username = claims.get("username", String.class);
             Collection<?> authorities = claims.get("authorities", Collection.class);
 
@@ -145,7 +134,10 @@ public class JwtTokenProvider {
                     .collect(Collectors.toList());
 
             // 인증된 사용자 정보를 담은 Authentication 객체 생성
-            return new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
+            JwtUserDetails principal = new JwtUserDetails(userId, username, grantedAuthorities);
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities);
+            usernamePasswordAuthenticationToken.setDetails(userId);
+            return usernamePasswordAuthenticationToken;
         } catch (SignatureException e) {
             throw new BadCredentialsException("유효하지 않은 JWT 서명입니다.");
         } catch (MalformedJwtException e) {

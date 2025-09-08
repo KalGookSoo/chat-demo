@@ -34,13 +34,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PrincipalProvider principalProvider(JwtTokenProvider jwtTokenProvider) {
-        return new HeaderPrincipalProvider(jwtTokenProvider);
+    public PrincipalProvider principalProvider() {
+        return new SecurityPrincipalProvider();
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(PrincipalProvider principalProvider, RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new JwtAuthenticationFilter(principalProvider, requestMappingHandlerMapping);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new JwtAuthenticationFilter(jwtTokenProvider, requestMappingHandlerMapping);
     }
 
     @Bean

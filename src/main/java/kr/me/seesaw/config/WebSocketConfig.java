@@ -1,8 +1,9 @@
-package kr.me.seesaw;
+package kr.me.seesaw.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import kr.me.seesaw.ChatWebSocketHandler;
 import kr.me.seesaw.security.JwtHandshakeInterceptor;
 import kr.me.seesaw.service.MessageService;
 import kr.me.seesaw.service.UserService;
