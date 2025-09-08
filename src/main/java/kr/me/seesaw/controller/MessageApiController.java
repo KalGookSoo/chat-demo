@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessageApiController {
     private final MessageService messageService;
 
-    @PreAuthorize("isAuthenticated() and @defaultMessageService.isMember(#chatRoomId, authentication.name)")
+    @PreAuthorize("isAuthenticated() and @defaultMessageService.isMember(#chatRoomId, authentication.details)")
     @GetMapping
     public ResponseEntity<PagedModel<MessageResponse>> getMessages(@RequestParam String chatRoomId) {
         Page<MessageResponse> page = messageService.getMessagesByChatRoomId(chatRoomId);
