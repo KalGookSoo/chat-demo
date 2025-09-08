@@ -5,6 +5,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -25,6 +26,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 .getQueryParams()
                 .getFirst("accessToken");
         Authentication authentication = jwtTokenProvider.validateTokenAndGetAuthentication(accessToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         attributes.put("authentication", authentication);
         return true;
     }
