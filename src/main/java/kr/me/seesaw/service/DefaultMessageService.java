@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -41,9 +42,9 @@ public class DefaultMessageService implements MessageService {
     }
 
     @Override
-    public Page<MessageResponse> getMessagesByChatRoomId(String chatRoomId) {
-        Sort sort = Sort.by(Sort.Order.asc("createdDate"));
-        PageRequest pageRequest = PageRequest.of(0, 30, sort);
+    public Page<MessageResponse> getMessagesByChatRoomId(String chatRoomId, int pageNumber, int pageSize) {
+        Sort sort = Sort.by(Sort.Order.desc("createdDate"));
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
         Page<Message> page = messageRepository.findAllByChatRoomId(chatRoomId, pageRequest);
         Collection<String> userIds = page.getContent()
                 .stream()
@@ -55,6 +56,7 @@ public class DefaultMessageService implements MessageService {
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
         List<MessageResponse> messageResponses = page.getContent()
                 .stream()
+                .sorted(Comparator.comparing(Message::getCreatedDate))
                 .map(message ->
                         new MessageResponse(
                                 message.getId(),
@@ -66,7 +68,6 @@ public class DefaultMessageService implements MessageService {
                                 new SenderResponse(message.getSenderId(), users.get(message.getSenderId()).getName())
                         )
                 ).toList();
-
         return new PageImpl<>(messageResponses, page.getPageable(), page.getTotalElements());
     }
 

@@ -20,8 +20,13 @@ public class MessageApiController {
 
     @PreAuthorize("isAuthenticated() and @defaultMessageService.isMember(#chatRoomId, authentication.details)")
     @GetMapping
-    public ResponseEntity<PagedModel<MessageResponse>> getMessages(@RequestParam String chatRoomId) {
-        Page<MessageResponse> page = messageService.getMessagesByChatRoomId(chatRoomId);
+    public ResponseEntity<PagedModel<MessageResponse>> getMessages(
+            @RequestParam String chatRoomId,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "30") int pageSize
+    ) {
+        Page<MessageResponse> page = messageService.getMessagesByChatRoomId(chatRoomId,
+                pageNumber, pageSize);
         PagedModel<MessageResponse> pagedModel = new PagedModel<>(page);
         return ResponseEntity.ok(pagedModel);
     }
