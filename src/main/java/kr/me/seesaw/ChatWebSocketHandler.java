@@ -87,7 +87,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 message.getType(),
                 message.getMimeType(),
                 message.getCreatedDate(),
-                new SenderResponse(message.getId(), user.getName())
+                new SenderResponse(user.getId(), user.getName())
         );
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
@@ -129,7 +129,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 message.getType(),
                 message.getMimeType(),
                 message.getCreatedDate(),
-                new SenderResponse(message.getId(), user.getName())
+                new SenderResponse(user.getId(), user.getName())
         );
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
@@ -175,7 +175,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                     message.getType(),
                     message.getMimeType(),
                     message.getCreatedDate(),
-                    new SenderResponse(message.getId(), user.getName())
+                    new SenderResponse(user.getId(), user.getName())
             );
             String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
             chatSessionManager.broadcastToRoom(userSession.getChatRoomId(), broadcastMessage);
