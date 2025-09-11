@@ -1,5 +1,6 @@
 package kr.me.seesaw.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +40,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new JwtAuthenticationFilter(jwtTokenProvider, requestMappingHandlerMapping);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper, RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new JwtAuthenticationFilter(jwtTokenProvider, objectMapper, requestMappingHandlerMapping);
     }
 
     @Bean
