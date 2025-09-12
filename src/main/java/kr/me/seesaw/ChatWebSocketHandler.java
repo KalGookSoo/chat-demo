@@ -197,6 +197,12 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
         private final ObjectMapper objectMapper;
 
+        private final Map<String, Object> sendLocks = new ConcurrentHashMap<>();
+
+        private Object getSendLock(WebSocketSession session) {
+            return sendLocks.computeIfAbsent(session.getId(), k -> new Object());
+        }
+
         /**
          * 새로운 세션을 등록합니다
          */
@@ -223,6 +229,8 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         public UserSession removeSession(WebSocketSession session) {
             String sessionId = session.getId();
             UserSession userInfo = userSessionBySessionId.remove(sessionId);
+            // 전송 락 정리
+            sendLocks.remove(sessionId);
 
             if (userInfo != null) {
                 String userId = userInfo.getUserId();
@@ -271,8 +279,11 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             for (WebSocketSession session : sessions) {
                 if (session.isOpen()) {
                     try {
-                        session.sendMessage(new TextMessage(textMessage));
-                    } catch (IOException e) {
+                        Object lock = getSendLock(session);
+                        synchronized (lock) {
+                            session.sendMessage(new TextMessage(textMessage));
+                        }
+                    } catch (IOException | IllegalStateException e) {
                         logger.error("메시지 전송 실패 - 세션ID: {}, 오류: {}", session.getId(), e.getMessage());
                         closedSessions.add(session);
                     }
@@ -309,8 +320,11 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                                     .filter(WebSocketSession::isOpen)
                                     .forEach(session -> {
                                         try {
-                                            session.sendMessage(textMessage);
-                                        } catch (IOException e) {
+                                            Object lock = getSendLock(session);
+                                            synchronized (lock) {
+                                                session.sendMessage(textMessage);
+                                            }
+                                        } catch (IOException | IllegalStateException e) {
                                             logger.error("사용자별 메시지 전송 실패 - 사용자: {}, 세션ID: {}, 오류: {}",
                                                     userId, sessionId, e.getMessage());
                                             // 전송 실패 세션 정리
