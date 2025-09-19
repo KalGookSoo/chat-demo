@@ -10,6 +10,9 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @ToString
 public class ChatRoomResponse implements Serializable {
+
     private String id;
+
     private String name;
+
 }

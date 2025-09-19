@@ -6,7 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
 
 public interface MessageRepository extends Repository<Message, String> {
+
     Page<Message> findAllByChatRoomId(String chatRoomId, Pageable pageable);
 
     Message save(Message message);
+
 }

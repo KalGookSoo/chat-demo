@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/messages")
 public class MessageApiController {
+
     private final MessageService messageService;
 
     @PreAuthorize("isAuthenticated() and @defaultMessageService.isMember(#chatRoomId, authentication.details)")
@@ -30,4 +31,5 @@ public class MessageApiController {
         PagedModel<MessageResponse> pagedModel = new PagedModel<>(page);
         return ResponseEntity.ok(pagedModel);
     }
+
 }

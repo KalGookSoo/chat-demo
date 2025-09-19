@@ -19,6 +19,7 @@ import static lombok.AccessLevel.PROTECTED;
 @DynamicInsert
 @DynamicUpdate
 public class ChatRoomMember extends BaseEntity {
+
     @Comment("채팅방 식별자")
     @ManyToOne
     @JoinColumn(name = "chat_room_id", referencedColumnName = "id")
@@ -31,4 +32,5 @@ public class ChatRoomMember extends BaseEntity {
     protected void setChatRoom(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
     }
+
 }

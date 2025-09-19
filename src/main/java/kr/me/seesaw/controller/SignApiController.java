@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class SignApiController {
+
     private final UserService userService;
 
     private final AuthenticationService authenticationService;
@@ -40,4 +41,5 @@ public class SignApiController {
         JsonWebToken response = authenticationService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(response);
     }
+
 }

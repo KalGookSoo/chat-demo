@@ -27,6 +27,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtTokenProvider jwtTokenProvider;
 
     private final ObjectMapper objectMapper;
@@ -40,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
         // Bearer 토큰이 존재하는 경우 처리
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7); // "Bearer " 이후의 토큰 추출
@@ -86,6 +86,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         // HandlerMethod가 아닌 경우(예: 리소스 핸들러 등)는 필터를 스킵
         return true;
-
     }
+
 }

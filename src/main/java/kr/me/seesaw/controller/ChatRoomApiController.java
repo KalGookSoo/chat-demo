@@ -17,6 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/chat-rooms")
 public class ChatRoomApiController {
+
     private final ChatRoomService chatRoomService;
 
     private final PrincipalProvider principalProvider;
@@ -30,4 +31,5 @@ public class ChatRoomApiController {
         List<ChatRoomResponse> chatRooms = chatRoomService.getChatRoomsByUserId(userId);
         return ResponseEntity.ok(Map.of("chatRooms", chatRooms));
     }
+
 }

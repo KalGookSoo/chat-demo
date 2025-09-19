@@ -28,4 +28,5 @@ class HomeControllerSliceTest {
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(MockMvcResultMatchers.view().name("redirect:/swagger-ui/index.html"));
     }
+
 }

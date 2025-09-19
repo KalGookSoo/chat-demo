@@ -10,7 +10,9 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @ToString
 public class SenderResponse implements Serializable {
+
     private String id;
 
     private String name;
+
 }

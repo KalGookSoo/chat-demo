@@ -25,6 +25,7 @@ import static lombok.AccessLevel.PROTECTED;
 @DynamicInsert
 @DynamicUpdate
 public class ChatRoom extends BaseEntity {
+
     @Comment("이름")
     private String name;
 
@@ -41,4 +42,5 @@ public class ChatRoom extends BaseEntity {
             member.setChatRoom(this);
         }
     }
+
 }

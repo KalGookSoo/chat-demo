@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 @RequiredArgsConstructor
 @Configuration
 public class AppInitializer implements CommandLineRunner {
+
     private final UserService userService;
 
     private final ChatRoomService chatRoomService;
@@ -27,4 +28,5 @@ public class AppInitializer implements CommandLineRunner {
             chatRoomService.addMember(chatRoom.getId(), tester2.getId());
         });
     }
+
 }

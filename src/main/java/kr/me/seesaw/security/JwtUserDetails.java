@@ -9,6 +9,7 @@ import java.util.Collections;
 
 @Getter
 public class JwtUserDetails implements UserDetails {
+
     private final String userId;
 
     private final String username;
@@ -35,4 +36,5 @@ public class JwtUserDetails implements UserDetails {
     public String getUsername() {
         return username;
     }
+
 }

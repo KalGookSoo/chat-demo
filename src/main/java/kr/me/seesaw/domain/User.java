@@ -26,6 +26,7 @@ import static lombok.AccessLevel.PROTECTED;
 @DynamicInsert
 @DynamicUpdate
 public class User extends BaseEntity {
+
     @Column(unique = true, nullable = false)
     @Comment("계정명")
     private String username;
@@ -78,6 +79,7 @@ public class User extends BaseEntity {
 
     /**
      * 계정이 만료되지 않았는지 여부를 반환합니다.
+     *
      * @return 계정이 만료되지 않았는지 여부
      */
     public boolean isAccountNonExpired() {
@@ -86,6 +88,7 @@ public class User extends BaseEntity {
 
     /**
      * 계정이 잠겨있지 않은지 여부를 반환합니다.
+     *
      * @return 계정이 잠겨있지 않은지 여부
      */
     public boolean isAccountNonLocked() {
@@ -94,9 +97,11 @@ public class User extends BaseEntity {
 
     /**
      * 계정의 패스워드가 만료되지 않았는지 여부를 반환합니다.
+     *
      * @return 계정의 패스워드가 만료되지 않았는지 여부
      */
     public boolean isCredentialsNonExpired() {
         return credentialsExpiredDate == null || credentialsExpiredDate.isAfter(LocalDateTime.now());
     }
+
 }

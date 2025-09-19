@@ -18,13 +18,13 @@ import static lombok.AccessLevel.PROTECTED;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true, exclude = "users")
 @ToString(callSuper = true, exclude = "users")
-
 @Entity
 @Table(name = "tb_role")
 @Comment("역할")
 @DynamicInsert
 @DynamicUpdate
 public class Role extends BaseEntity {
+
     @Comment("이름")
     private String name;
 
@@ -38,4 +38,5 @@ public class Role extends BaseEntity {
         this.name = name;
         this.alias = alias;
     }
+
 }

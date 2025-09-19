@@ -19,6 +19,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
+
     private final MessageService messageService;
 
     private final UserService userService;
@@ -45,4 +46,5 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
     }
+
 }

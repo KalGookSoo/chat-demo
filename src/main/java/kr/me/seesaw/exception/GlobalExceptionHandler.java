@@ -1,6 +1,7 @@
 package kr.me.seesaw.exception;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.persistence.EntityNotFoundException;
 import kr.me.seesaw.dto.ValidationError;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -74,6 +75,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Map<String, String>> handleNoSuchElementException(NoSuchElementException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleEntityNotFoundException(EntityNotFoundException e) {
+        return handleNoSuchElementException(new NoSuchElementException(e));
     }
 
     @Override

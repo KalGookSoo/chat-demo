@@ -34,4 +34,5 @@ public class NotificationConfig {
         executor.initialize();
         return executor;
     }
+
 }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @ToString
 public class NotificationResponse implements Serializable {
+
     private String id;
 
     private String chatRoomId;
@@ -25,4 +26,5 @@ public class NotificationResponse implements Serializable {
     private LocalDateTime createdDate;
 
     private SenderResponse sender;
+
 }

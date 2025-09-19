@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ChatWebSocketHandler extends AbstractWebSocketHandler {
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final MessageService messageService;
@@ -59,24 +60,19 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             logger.warn("연결 수립 중 URI가 없습니다. sessionId={}", session.getId());
             return;
         }
-
         // QueryParams로 채팅방 식별
         String chatRoomId = UriComponentsBuilder.fromUri(uri)
                 .build()
                 .getQueryParams()
                 .getFirst("chatRoomId");
-
         if (chatRoomId == null || chatRoomId.isBlank()) {
             logger.warn("연결 수립 중 chatRoomId가 없습니다. sessionId={}", session.getId());
             return;
         }
-
         String username = authentication.getName();
         User user = userService.getUserByUsername(username);
-
         // 세션 등록
         chatSessionManager.addSession(session, user.getId(), chatRoomId);
-
         // 알림
         String content = "선수 입장: " + user.getName();
         Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
@@ -91,7 +87,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         );
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
-
         // TODO 서비스 워커 알림
     }
 
@@ -106,22 +101,18 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             logger.warn("URI 부재로 메시지를 처리할 수 없습니다. sessionId={}", session.getId());
             return;
         }
-
         // QueryParams로 채팅방 식별
         String chatRoomId = UriComponentsBuilder.fromUri(uri)
                 .build()
                 .getQueryParams()
                 .getFirst("chatRoomId");
-
         if (chatRoomId == null || chatRoomId.isBlank()) {
             logger.warn("chatRoomId 부재로 메시지를 처리할 수 없습니다. sessionId={}", session.getId());
             return;
         }
-
         // 메시지 영속화
         User user = userService.getUserByUsername(authentication.getName());
         Message message = messageService.createMessage(textMessage.getPayload(), user.getId(), chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
-
         MessageResponse messageResponse = new MessageResponse(
                 message.getId(),
                 message.getChatRoomId(),
@@ -133,12 +124,10 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         );
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
-
         // TODO 서비스 워커 알림
         // TODO 채팅방에 메시지 전송
         // TODO 채팅방에 구독한 구독자들에게 푸시 알림
     }
-
 
     @Override
     public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) throws Exception {
@@ -163,7 +152,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             } else {
                 logger.info("연결 종료: {}, 상태: {}", userSession, status);
             }
-
             // 알림 전송
             User user = userService.getUserById(userSession.getUserId());
             String exitMessage = "선수 퇴장: " + user.getName();
@@ -184,6 +172,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     @RequiredArgsConstructor
     public static class ChatSessionManager {
+
         private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
         // 채팅방별 세션 관리: chatRoomId -> Set<WebSocketSession>
@@ -208,17 +197,13 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
          */
         public void addSession(WebSocketSession session, String userId, String chatRoomId) {
             String sessionId = session.getId();
-
             // 1. 채팅방별 세션 관리
             sessionSetByChatRoomId.computeIfAbsent(chatRoomId, k -> ConcurrentHashMap.newKeySet()).add(session);
-
             // 2. 세션별 사용자 정보 저장
             UserSession userInfo = new UserSession(sessionId, userId, chatRoomId);
             userSessionBySessionId.put(sessionId, userInfo);
-
             // 3. 사용자별 세션 관리 (다중 접속 지원)
             sessionIdSetByUserId.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
-
             logger.info("세션 등록됨 - {}", userInfo);
             logger.info("채팅방 {} 현재 참가자 수: {}", chatRoomId, getRoomParticipantCount(chatRoomId));
         }
@@ -231,11 +216,9 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             UserSession userInfo = userSessionBySessionId.remove(sessionId);
             // 전송 락 정리
             sendLocks.remove(sessionId);
-
             if (userInfo != null) {
                 String userId = userInfo.getUserId();
                 String chatRoomId = userInfo.getChatRoomId();
-
                 // 1. 채팅방에서 세션 제거
                 Set<WebSocketSession> roomSessionSet = sessionSetByChatRoomId.get(chatRoomId);
                 if (roomSessionSet != null) {
@@ -246,7 +229,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                         logger.info("빈 채팅방 제거: {}", chatRoomId);
                     }
                 }
-
                 // 2. 사용자별 세션 관리에서 제거
                 Set<String> userSessionSet = sessionIdSetByUserId.get(userId);
                 if (userSessionSet != null) {
@@ -257,10 +239,8 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                         logger.info("사용자의 모든 세션 종료: {}", userId);
                     }
                 }
-
                 logger.info("세션 제거됨 - {}", userInfo);
             }
-
             return userInfo;
         }
 
@@ -273,9 +253,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 logger.debug("채팅방에 활성 세션이 없음: {}", chatRoomId);
                 return;
             }
-
             List<WebSocketSession> closedSessions = new ArrayList<>();
-
             for (WebSocketSession session : sessions) {
                 if (session.isOpen()) {
                     try {
@@ -291,7 +269,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                     closedSessions.add(session);
                 }
             }
-
             // 끊어진 세션들 정리
             closedSessions.forEach(this::removeSession);
         }
@@ -305,11 +282,9 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                 logger.debug("사용자의 활성 세션이 없음: {}", userId);
                 return;
             }
-
             try {
                 String jsonMessage = objectMapper.writeValueAsString(Map.of("message", message));
                 TextMessage textMessage = new TextMessage(jsonMessage);
-
                 sessionIds.forEach(sessionId -> {
                     UserSession userInfo = userSessionBySessionId.get(sessionId);
                     if (userInfo != null) {
@@ -362,7 +337,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             if (sessions == null) {
                 return Collections.emptySet();
             }
-
             return sessions.stream()
                     .filter(WebSocketSession::isOpen)
                     .map(WebSocketSession::getId)
@@ -377,7 +351,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
          */
         public Map<String, Object> getAllRoomsStatus() {
             Map<String, Object> status = new ConcurrentHashMap<>();
-
             sessionSetByChatRoomId.forEach((chatRoomId, sessions) -> {
                 Set<String> activeUsers = getRoomActiveUsers(chatRoomId);
                 status.put(chatRoomId, Map.of(
@@ -385,7 +358,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                         "activeUsers", activeUsers
                 ));
             });
-
             return status;
         }
 
@@ -405,7 +377,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             if (sessionIds == null || sessionIds.isEmpty()) {
                 return false;
             }
-
             return sessionIds.stream()
                     .map(userSessionBySessionId::get)
                     .filter(Objects::nonNull)
@@ -417,7 +388,6 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
          */
         public void cleanupClosedSessions() {
             List<WebSocketSession> closedSessions = new ArrayList<>();
-
             sessionSetByChatRoomId.values().forEach(sessions -> {
                 sessions.forEach(session -> {
                     if (!session.isOpen()) {
@@ -425,9 +395,7 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
                     }
                 });
             });
-
             closedSessions.forEach(this::removeSession);
-
             logger.info("끊어진 세션 {} 개 정리 완료", closedSessions.size());
         }
 
@@ -453,9 +421,13 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
     @EqualsAndHashCode
     @ToString
     public static class UserSession {
+
         private final String userId;
+
         private final String chatRoomId;
+
         private final long connectionTime;
+
         private final String sessionId;
 
         public UserSession(String sessionId, String userId, String chatRoomId) {

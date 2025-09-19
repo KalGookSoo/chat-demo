@@ -9,6 +9,8 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
@@ -36,6 +38,15 @@ abstract public class BaseEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Comment("생성일시")
     private LocalDateTime createdDate;
+
+    @LastModifiedBy
+    @Comment("수정자")
+    private String lastModifiedBy;
+
+    @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    @Comment("수정일시")
+    private LocalDateTime lastModifiedDate;
 
     @Version
     @Comment("버전")

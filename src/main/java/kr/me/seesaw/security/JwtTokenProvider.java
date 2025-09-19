@@ -42,7 +42,6 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-
         return Jwts.builder()
                 .setSubject(userId)
                 .claim("username", username)
@@ -60,7 +59,6 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-
         return Jwts.builder()
                 .setSubject(userId)
                 .claim("username", username)
@@ -81,31 +79,24 @@ public class JwtTokenProvider {
     public JsonWebToken refreshToken(String refreshToken) {
         // 리프레시 토큰 유효성 검증
         SecretKey key = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-
         // 리프레시 토큰 파싱
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(refreshToken)
                 .getBody();
-
         // 계정 식별자 추출
         String userId = claims.getSubject();
-
         String username = claims.get("username", String.class);
-
         @SuppressWarnings("noinspection unchecked")
         Collection<String> authorities = claims.get("authorities", Collection.class);
         if (authorities == null || authorities.isEmpty()) {
             throw new BadCredentialsException("유효하지 않은 리프레시 토큰입니다.");
         }
-
         // 새로운 액세스 토큰 생성
         String newAccessToken = generateAccessToken(userId, username, authorities);
-
         // 새로운 리프레시 토큰 생성 (선택적)
         String newRefreshToken = generateRefreshToken(userId, username, authorities);
-
         return new JsonWebToken(newAccessToken, newRefreshToken, ACCESS_TOKEN_EXPIRATION);
     }
 
@@ -118,21 +109,17 @@ public class JwtTokenProvider {
     public Authentication validateTokenAndGetAuthentication(String token) {
         try {
             SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-
             String userId = claims.getSubject();
             String username = claims.get("username", String.class);
             Collection<?> authorities = claims.get("authorities", Collection.class);
-
             Collection<GrantedAuthority> grantedAuthorities = authorities.stream()
                     .map(authority -> new SimpleGrantedAuthority(authority.toString()))
                     .collect(Collectors.toList());
-
             // 인증된 사용자 정보를 담은 Authentication 객체 생성
             JwtUserDetails principal = new JwtUserDetails(userId, username, grantedAuthorities);
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities);

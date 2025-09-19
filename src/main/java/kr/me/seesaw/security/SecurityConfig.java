@@ -60,10 +60,8 @@ public class SecurityConfig {
         http.cors(this::handleCorsPolicies);
         http.authorizeHttpRequests(this::handleAuthorizeHttpRequests);
         http.sessionManagement(this::handleSeesionManagement);
-
         // JWT 인증 필터 추가
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

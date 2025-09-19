@@ -11,9 +11,13 @@ import java.io.Serializable;
 @ToString
 @Getter
 public final class ValidationError implements Serializable {
+
     private final String code;
+
     private final String message;
+
     private final String field;
+
     private final Object rejectedValue;
 
     public ValidationError(FieldError error) {

@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class DefaultMessageService implements MessageService {
+
     private final MessageRepository messageRepository;
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
@@ -50,7 +51,6 @@ public class DefaultMessageService implements MessageService {
                 .stream()
                 .map(Message::getSenderId)
                 .toList();
-
         Map<String, User> users = userRepository.findAllByIdIn(userIds)
                 .stream()
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
@@ -75,4 +75,5 @@ public class DefaultMessageService implements MessageService {
     public boolean isMember(String chatRoomId, String userId) {
         return chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoomId, userId).isPresent();
     }
+
 }

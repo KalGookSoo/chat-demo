@@ -42,4 +42,5 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addMapping("/swagger-resources/**");
         registry.addMapping("/swagger-ui.html");
     }
+
 }
