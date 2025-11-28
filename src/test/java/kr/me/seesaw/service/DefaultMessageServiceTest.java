@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles({"test"})
@@ -44,7 +45,7 @@ class DefaultMessageServiceTest {
         String senderId = "senderId";
         String chatRoomId = "chatRoomId";
         MessageType type = MessageType.CHAT;
-        String mimeType = "mimeType";
+        String mimeType = MediaType.TEXT_PLAIN_VALUE;
 
         // when
         Message message = messageService.createMessage(content, senderId, chatRoomId, type, mimeType);
