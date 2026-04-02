@@ -1,6 +1,7 @@
 package kr.me.seesaw.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import kr.me.seesaw.component.properties.ApplicationProperties;
+import kr.me.seesaw.component.properties.Notification;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -12,24 +13,16 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class NotificationConfig {
 
-    @Value("${notification.async.core-pool-size:5}")
-    private int corePoolSize;
-
-    @Value("${notification.async.max-pool-size:10}")
-    private int maxPoolSize;
-
-    @Value("${notification.async.queue-capacity:25}")
-    private int queueCapacity;
-
     /**
      * Configure the executor for asynchronous notification processing
      */
     @Bean(name = "notificationTaskExecutor")
-    public Executor notificationTaskExecutor() {
+    public Executor notificationTaskExecutor(ApplicationProperties properties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(corePoolSize);
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setQueueCapacity(queueCapacity);
+        Notification notification = properties.getNotification();
+        executor.setCorePoolSize(notification.corePoolSize());
+        executor.setMaxPoolSize(notification.maxPoolSize());
+        executor.setQueueCapacity(notification.queueCapacity());
         executor.setThreadNamePrefix("notification-");
         executor.initialize();
         return executor;
