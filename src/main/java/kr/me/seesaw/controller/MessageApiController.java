@@ -19,7 +19,7 @@ public class MessageApiController {
 
     private final MessageService messageService;
 
-    @PreAuthorize("isAuthenticated() and @defaultMessageService.isMember(#chatRoomId, authentication.details)")
+    @PreAuthorize("isAuthenticated() and @chatRoomContext.isMember(#chatRoomId, authentication.details)")
     @GetMapping
     public ResponseEntity<PagedModel<MessageResponse>> getMessages(
             @RequestParam String chatRoomId,

@@ -11,6 +11,4 @@ public interface MessageService {
 
     Page<MessageResponse> getMessagesByChatRoomId(String chatRoomId, int pageNumber, int pageSize);
 
-    boolean isMember(String chatRoomId, String userId);
-
 }

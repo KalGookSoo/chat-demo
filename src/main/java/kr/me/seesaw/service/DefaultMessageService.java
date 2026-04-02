@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
-@Service
+@Service("messageService")
 public class DefaultMessageService implements MessageService {
 
     private final MessageRepository messageRepository;
@@ -69,11 +69,6 @@ public class DefaultMessageService implements MessageService {
                         )
                 ).toList();
         return new PageImpl<>(messageResponses, page.getPageable(), page.getTotalElements());
-    }
-
-    @Override
-    public boolean isMember(String chatRoomId, String userId) {
-        return chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoomId, userId).isPresent();
     }
 
 }
