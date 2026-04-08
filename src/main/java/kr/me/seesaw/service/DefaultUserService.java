@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.Role;
-import kr.me.seesaw.domain.User;
+import kr.me.seesaw.domain.entity.Role;
+import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

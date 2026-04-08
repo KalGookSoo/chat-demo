@@ -1,6 +1,6 @@
 package kr.me.seesaw;
 
-import kr.me.seesaw.domain.User;
+import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.service.ChatRoomService;
 import kr.me.seesaw.service.UserService;
 import lombok.RequiredArgsConstructor;

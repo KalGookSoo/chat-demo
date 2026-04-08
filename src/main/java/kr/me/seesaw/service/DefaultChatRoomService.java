@@ -1,9 +1,9 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.ChatRoom;
-import kr.me.seesaw.domain.ChatRoomMember;
-import kr.me.seesaw.domain.User;
-import kr.me.seesaw.dto.ChatRoomResponse;
+import kr.me.seesaw.domain.entity.ChatRoom;
+import kr.me.seesaw.domain.entity.ChatRoomMember;
+import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.ChatRoomRepository;
 import kr.me.seesaw.repository.UserRepository;
@@ -32,7 +32,8 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     @Override
     public void createChatRoom(String name) {
-        ChatRoom chatRoom = new ChatRoom(name);
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.setName(name);
         chatRoomRepository.save(chatRoom);
     }
 
@@ -46,8 +47,11 @@ public class DefaultChatRoomService implements ChatRoomService {
     public void addMember(String id, String memberId) {
         ChatRoom chatRoom = chatRoomRepository.getReferenceById(id);
         User user = userRepository.getReferenceById(memberId);
-        ChatRoomMember chatRoomMember = new ChatRoomMember(chatRoom, user.getId());
-        chatRoom.addMember(chatRoomMember);
+
+        // // TODO 이벤트로 대체할 것
+        ChatRoomMember chatRoomMember = new ChatRoomMember();
+        chatRoomMember.setChatRoom(chatRoom);
+        chatRoomMember.setUser(user);
         chatRoomMemberRepository.save(chatRoomMember);
     }
 

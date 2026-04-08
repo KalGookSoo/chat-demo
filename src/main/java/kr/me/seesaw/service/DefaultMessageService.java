@@ -1,11 +1,11 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.BaseEntity;
-import kr.me.seesaw.domain.Message;
-import kr.me.seesaw.domain.MessageType;
-import kr.me.seesaw.domain.User;
-import kr.me.seesaw.dto.MessageResponse;
-import kr.me.seesaw.dto.SenderResponse;
+import kr.me.seesaw.domain.entity.BaseEntity;
+import kr.me.seesaw.domain.entity.Message;
+import kr.me.seesaw.domain.vo.MessageType;
+import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.domain.dto.MessageResponse;
+import kr.me.seesaw.domain.dto.SenderResponse;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.MessageRepository;
 import kr.me.seesaw.repository.UserRepository;
@@ -37,7 +37,12 @@ public class DefaultMessageService implements MessageService {
 
     @Override
     public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
-        Message message = new Message(content, senderId, chatRoomId, type, mimeType);
+        Message message = new Message();
+        message.setContent(content);
+        message.setSenderId(senderId);
+        message.setChatRoomId(chatRoomId);
+        message.setType(type);
+        message.setMimeType(mimeType);
         messageRepository.save(message);
         return message;
     }

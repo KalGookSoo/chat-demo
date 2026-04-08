@@ -1,6 +1,6 @@
 package kr.me.seesaw.repository;
 
-import kr.me.seesaw.domain.ChatRoomMember;
+import kr.me.seesaw.domain.entity.ChatRoomMember;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;

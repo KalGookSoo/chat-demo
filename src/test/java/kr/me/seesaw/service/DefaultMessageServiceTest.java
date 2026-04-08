@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.Message;
-import kr.me.seesaw.domain.MessageType;
+import kr.me.seesaw.domain.entity.Message;
+import kr.me.seesaw.domain.vo.MessageType;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.MessageRepository;
 import kr.me.seesaw.repository.UserRepository;
@@ -14,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.UUID;
 
 @ActiveProfiles({"test"})
 @DataJpaTest
@@ -42,7 +44,7 @@ class DefaultMessageServiceTest {
     void createMessageShouldReturnMessage() {
         // given
         String content = "content";
-        String senderId = "senderId";
+        String senderId = UUID.randomUUID().toString();
         String chatRoomId = "chatRoomId";
         MessageType type = MessageType.CHAT;
         String mimeType = MediaType.TEXT_PLAIN_VALUE;

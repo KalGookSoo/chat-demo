@@ -1,6 +1,6 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.User;
+import kr.me.seesaw.domain.entity.User;
 
 public interface UserService {
 

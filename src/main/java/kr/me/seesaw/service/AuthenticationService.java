@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.dto.JsonWebToken;
-import kr.me.seesaw.dto.SignInRequest;
+import kr.me.seesaw.domain.dto.JsonWebToken;
+import kr.me.seesaw.domain.dto.SignInRequest;
 
 public interface AuthenticationService {
 

@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.ChatRoom;
-import kr.me.seesaw.dto.ChatRoomResponse;
+import kr.me.seesaw.domain.entity.ChatRoom;
+import kr.me.seesaw.domain.dto.ChatRoomResponse;
 
 import java.util.List;
 

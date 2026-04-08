@@ -1,12 +1,12 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.Role;
-import kr.me.seesaw.domain.User;
-import kr.me.seesaw.dto.JsonWebToken;
-import kr.me.seesaw.dto.SignInRequest;
-import kr.me.seesaw.dto.UserPrincipal;
+import kr.me.seesaw.domain.entity.Role;
+import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.domain.dto.JsonWebToken;
+import kr.me.seesaw.domain.dto.SignInRequest;
+import kr.me.seesaw.domain.dto.UserPrincipal;
 import kr.me.seesaw.repository.UserRepository;
-import kr.me.seesaw.security.JwtTokenProvider;
+import kr.me.seesaw.component.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;

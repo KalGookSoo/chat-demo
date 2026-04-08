@@ -25,12 +25,6 @@ spring:
 server:
   port: 3001
 
-notification:
-  async:
-    core-pool-size: 5
-    max-pool-size: 10
-    queue-capacity: 25
-
 jwt:
   secret:
     key: 1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()
@@ -48,3 +42,12 @@ management:
   info:
     env:
       enabled: true
+
+kr:
+  me:
+    seesaw:
+      filepath: ${user.home}/IdeaProjects/attachments
+      notification:
+        core-pool-size: 5
+        max-pool-size: 10
+        queue-capacity: 25

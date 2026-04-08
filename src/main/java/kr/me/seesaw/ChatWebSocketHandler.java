@@ -3,11 +3,12 @@ package kr.me.seesaw;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import kr.me.seesaw.domain.Message;
-import kr.me.seesaw.domain.MessageType;
-import kr.me.seesaw.domain.User;
-import kr.me.seesaw.dto.MessageResponse;
-import kr.me.seesaw.dto.SenderResponse;
+import kr.me.seesaw.domain.dto.MessageResponse;
+import kr.me.seesaw.domain.dto.SenderResponse;
+import kr.me.seesaw.domain.entity.Message;
+import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.domain.vo.MessageType;
+import kr.me.seesaw.repository.MessageRepository;
 import kr.me.seesaw.service.MessageService;
 import kr.me.seesaw.service.UserService;
 import lombok.EqualsAndHashCode;
@@ -42,6 +43,8 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     private final ObjectMapper objectMapper;
 
+    private final MessageRepository messageRepository;
+
     private ChatSessionManager chatSessionManager;
 
     @PostConstruct
@@ -51,38 +54,31 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws JsonProcessingException {
-        if (!(session.getAttributes().get("authentication") instanceof Authentication authentication)) {
-            logger.warn("연결 수립 중 인증 정보를 찾을 수 없습니다. sessionId={}", session.getId());
-            return;
-        }
-        URI uri = session.getUri();
-        if (uri == null) {
-            logger.warn("연결 수립 중 URI가 없습니다. sessionId={}", session.getId());
-            return;
-        }
-        // QueryParams로 채팅방 식별
-        String chatRoomId = UriComponentsBuilder.fromUri(uri)
-                .build()
-                .getQueryParams()
-                .getFirst("chatRoomId");
-        if (chatRoomId == null || chatRoomId.isBlank()) {
-            logger.warn("연결 수립 중 chatRoomId가 없습니다. sessionId={}", session.getId());
-            return;
-        }
+        Authentication authentication = (Authentication) session.getAttributes().get("authentication");
+        String chatRoomId = (String) session.getAttributes().get("chatRoomId");
         String username = authentication.getName();
         User user = userService.getUserByUsername(username);
         // 세션 등록
         chatSessionManager.addSession(session, user.getId(), chatRoomId);
         // 알림
         String content = "선수 입장: " + user.getName();
-        Message message = new Message(content, authentication.getName(), chatRoomId, MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
+        Message message = new Message();
+        message.setContent(content);
+        message.setSenderId(user.getId());
+        message.setChatRoomId(chatRoomId);
+        message.setType(MessageType.NOTIFICATION);
+        message.setMimeType(MediaType.TEXT_PLAIN_VALUE);
+
+        Message savedMessage = messageRepository.save(message);
+        messageRepository.flush();
+
         MessageResponse messageResponse = new MessageResponse(
-                message.getId(),
-                message.getChatRoomId(),
-                message.getContent(),
-                message.getType(),
-                message.getMimeType(),
-                message.getCreatedDate(),
+                savedMessage.getId(),
+                savedMessage.getChatRoomId(),
+                savedMessage.getContent(),
+                savedMessage.getType(),
+                savedMessage.getMimeType(),
+                savedMessage.getCreatedDate(),
                 new SenderResponse(user.getId(), user.getName())
         );
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
@@ -155,14 +151,23 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             // 알림 전송
             User user = userService.getUserById(userSession.getUserId());
             String exitMessage = "선수 퇴장: " + user.getName();
-            Message message = new Message(exitMessage, userSession.getUserId(), userSession.getChatRoomId(), MessageType.NOTIFICATION, MediaType.TEXT_PLAIN_VALUE);
+            Message message = new Message();
+            message.setContent(exitMessage);
+            message.setSenderId(user.getId());
+            message.setChatRoomId(userSession.getChatRoomId());
+            message.setType(MessageType.NOTIFICATION);
+            message.setMimeType(MediaType.TEXT_PLAIN_VALUE);
+
+            Message savedMessage = messageRepository.save(message);
+            messageRepository.flush();
+
             MessageResponse messageResponse = new MessageResponse(
-                    message.getId(),
-                    message.getChatRoomId(),
-                    message.getContent(),
-                    message.getType(),
-                    message.getMimeType(),
-                    message.getCreatedDate(),
+                    savedMessage.getId(),
+                    savedMessage.getChatRoomId(),
+                    savedMessage.getContent(),
+                    savedMessage.getType(),
+                    savedMessage.getMimeType(),
+                    savedMessage.getCreatedDate(),
                     new SenderResponse(user.getId(), user.getName())
             );
             String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));

@@ -1,0 +1,48 @@
+{
+  "properties": [
+    {
+      "name": "kr.me.seesaw.filepath",
+      "type": "java.nio.file.Path",
+      "description": "첨부 파일을 저장하고 읽어올 기본 디렉터리 경로입니다.",
+      "defaultValue": "${user.home}/attachments"
+    },
+    {
+      "name": "kr.me.seesaw.notification.core-pool-size",
+      "type": "java.lang.Integer",
+      "description": "알림 처리를 위한 스레드 풀의 기본 크기입니다.",
+      "defaultValue": 5
+    },
+    {
+      "name": "kr.me.seesaw.notification.max-pool-size",
+      "type": "java.lang.Integer",
+      "description": "알림 처리를 위한 스레드 풀의 최대 크기입니다.",
+      "defaultValue": 10
+    },
+    {
+      "name": "kr.me.seesaw.notification.queue-capacity",
+      "type": "java.lang.Integer",
+      "description": "알림 처리를 위한 대기 큐의 용량입니다.",
+      "defaultValue": 25
+    }
+  ],
+  "hints": [
+    {
+      "name": "kr.me.seesaw.filepath",
+      "values": [
+        {
+          "value": "/var/seesaw/attachments",
+          "description": "운영 서버 권장 기본 경로"
+        },
+        {
+          "value": "${user.home}/attachments",
+          "description": "로컬 개발 기본 경로"
+        }
+      ],
+      "providers": [
+        {
+          "name": "any"
+        }
+      ]
+    }
+  ]
+}
