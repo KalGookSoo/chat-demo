@@ -1,40 +1,26 @@
 package kr.me.seesaw.domain.dto;
 
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
-@Getter
-public class JwtUserDetails implements UserDetails {
-
-    private final String userId;
-
-    private final String username;
-
-    private final Collection<? extends GrantedAuthority> authorities;
-
-    public JwtUserDetails(String userId, String username, Collection<? extends GrantedAuthority> authorities) {
-        this.userId = userId;
-        this.username = username;
-        this.authorities = authorities == null ? Collections.emptyList() : authorities;
-    }
+public record JwtUserDetails(String userId, String username, Collection<? extends GrantedAuthority> authorities) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return authorities == null ? List.of() : authorities;
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return "[PROTECTED]";
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return username();
     }
 
 }

@@ -26,7 +26,7 @@ public class Message extends BaseEntity {
     @JoinColumn(name = "sender_id", referencedColumnName = "id")
     private User sender;
 
-    @Column(length = 36, insertable = false, updatable = false, nullable = false)
+    @Column(name = "sender_id", length = 36, insertable = false, updatable = false, nullable = false)
     private String senderId;
 
     @Comment("채팅방 식별자")
@@ -34,7 +34,7 @@ public class Message extends BaseEntity {
     @JoinColumn(name = "chat_room_id", referencedColumnName = "id")
     private ChatRoom chatRoom;
 
-    @Column(length = 36, insertable = false, updatable = false, nullable = false)
+    @Column(name = "chat_room_id", length = 36, insertable = false, updatable = false, nullable = false)
     private String chatRoomId;
 
     @Column(nullable = false)

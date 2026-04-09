@@ -26,7 +26,7 @@ public class SignApiController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest request) {
-        userService.createUser(request.getUsername(), request.getPassword(), request.getName());
+        userService.createUser(request.username(), request.password(), request.name());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -38,7 +38,7 @@ public class SignApiController {
 
     @PostMapping("/token/refresh")
     public ResponseEntity<JsonWebToken> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
-        JsonWebToken response = authenticationService.refreshToken(request.getRefreshToken());
+        JsonWebToken response = authenticationService.refreshToken(request.refreshToken());
         return ResponseEntity.ok(response);
     }
 

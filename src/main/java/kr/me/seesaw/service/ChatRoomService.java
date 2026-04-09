@@ -13,7 +13,7 @@ public interface ChatRoomService {
 
     List<ChatRoom> getAllChatRooms();
 
-    void addMember(String id, String memberId);
+    void addMember(String chatRoomId, String memberId);
 
     List<ChatRoomResponse> getChatRoomsByUserId(String userId);
 

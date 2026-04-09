@@ -8,11 +8,13 @@ import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.ChatRoomRepository;
 import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -32,6 +34,7 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     @Override
     public void createChatRoom(String name) {
+        log.info("채팅방을 생성합니다. name: {}", name);
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.setName(name);
         chatRoomRepository.save(chatRoom);
@@ -40,15 +43,16 @@ public class DefaultChatRoomService implements ChatRoomService {
     @Transactional(readOnly = true)
     @Override
     public List<ChatRoom> getAllChatRooms() {
+        log.debug("모든 채팅방을 조회합니다.");
         return chatRoomRepository.findAll();
     }
 
     @Override
-    public void addMember(String id, String memberId) {
-        ChatRoom chatRoom = chatRoomRepository.getReferenceById(id);
+    public void addMember(String chatRoomId, String memberId) {
+        log.info("채팅방에 멤버를 추가합니다. chatRoomId: {}, memberId: {}", chatRoomId, memberId);
+        ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
         User user = userRepository.getReferenceById(memberId);
 
-        // // TODO 이벤트로 대체할 것
         ChatRoomMember chatRoomMember = new ChatRoomMember();
         chatRoomMember.setChatRoom(chatRoom);
         chatRoomMember.setUser(user);
@@ -57,6 +61,7 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     @Override
     public List<ChatRoomResponse> getChatRoomsByUserId(String userId) {
+        log.debug("유저가 속한 채팅방을 조회합니다. userId: {}", userId);
         List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByUserId(userId);
         return chatRoomMembers.stream().map(ChatRoomMember::getChatRoom).map(chatRoom -> new ChatRoomResponse(chatRoom.getId(), chatRoom.getName())).toList();
     }

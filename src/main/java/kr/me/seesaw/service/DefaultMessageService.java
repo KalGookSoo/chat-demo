@@ -1,15 +1,18 @@
 package kr.me.seesaw.service;
 
 import kr.me.seesaw.domain.entity.BaseEntity;
+import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.Message;
 import kr.me.seesaw.domain.vo.MessageType;
 import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.domain.dto.MessageResponse;
 import kr.me.seesaw.domain.dto.SenderResponse;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
+import kr.me.seesaw.repository.ChatRoomRepository;
 import kr.me.seesaw.repository.MessageRepository;
 import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +27,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service("messageService")
@@ -31,16 +35,21 @@ public class DefaultMessageService implements MessageService {
 
     private final MessageRepository messageRepository;
 
-    private final ChatRoomMemberRepository chatRoomMemberRepository;
-
     private final UserRepository userRepository;
 
+    private final ChatRoomRepository chatRoomRepository;
+
+    @Transactional
     @Override
     public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
+        log.info("메시지 생성을 시작합니다. content: {}, senderId: {}, chatRoomId: {}, type: {}, mimeType: {}", content, senderId, chatRoomId, type, mimeType);
+        User sender = userRepository.findById(senderId).orElseThrow();
+        ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
+        
         Message message = new Message();
         message.setContent(content);
-        message.setSenderId(senderId);
-        message.setChatRoomId(chatRoomId);
+        message.setSender(sender);
+        message.setChatRoom(chatRoom);
         message.setType(type);
         message.setMimeType(mimeType);
         messageRepository.save(message);
@@ -49,6 +58,8 @@ public class DefaultMessageService implements MessageService {
 
     @Override
     public Page<MessageResponse> getMessagesByChatRoomId(String chatRoomId, int pageNumber, int pageSize) {
+        log.debug("채팅방 ID {}에 대한 메시지 조회를 시작합니다. 페이지 번호: {}, 페이지 크기: {}", chatRoomId, pageNumber, pageSize);
+
         Sort sort = Sort.by(Sort.Order.desc("createdDate"));
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
         Page<Message> page = messageRepository.findAllByChatRoomId(chatRoomId, pageRequest);

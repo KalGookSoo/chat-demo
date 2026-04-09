@@ -9,13 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class UserPrincipal implements UserDetails {
-
-    private final User user;
-
-    public UserPrincipal(User user) {
-        this.user = user;
-    }
+public record UserPrincipal(User user) implements UserDetails {
 
     public String getUserId() {
         return user.getId();
@@ -61,32 +55,6 @@ public class UserPrincipal implements UserDetails {
         boolean accountNonExpired = isAccountNonExpired();
         boolean credentialsNonExpired = isCredentialsNonExpired();
         return accountNonLocked && accountNonExpired && credentialsNonExpired;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof User that) {
-            return getUsername().equals(that.getUsername());
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getUsername().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getName() + " [" +
-                "Username=" + getUsername() + ", " +
-                "Password=[PROTECTED], " +
-                "Enabled=" + isEnabled() + ", " +
-                "AccountNonExpired=" + isAccountNonExpired() + ", " +
-                "CredentialsNonExpired=" + isCredentialsNonExpired() + ", " +
-                "AccountNonLocked=" + isAccountNonLocked() + ", " +
-                "Granted Authorities=" + getAuthorities() + "]";
     }
 
 }

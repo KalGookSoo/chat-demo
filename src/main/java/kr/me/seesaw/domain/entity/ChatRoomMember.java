@@ -8,7 +8,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 @Setter
 @Getter
-@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true, exclude = {"chatRoom"})
 @ToString(callSuper = true, exclude = {"chatRoom"})
 @Entity
@@ -28,11 +27,10 @@ public class ChatRoomMember extends BaseEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @Column(length = 36, insertable = false, updatable = false, nullable = false)
-    @Comment("계정 식별자")
+    @Column(name = "user_id", length = 36, insertable = false, updatable = false, nullable = false)
     private String userId;
 
-    @Column(name = "chat_room_id", insertable = false, updatable = false, nullable = false)
+    @Column(name = "chat_room_id", length = 36, insertable = false, updatable = false, nullable = false)
     private String chatRoomId;
 
 }

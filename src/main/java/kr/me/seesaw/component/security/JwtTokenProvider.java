@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.SignatureException;
 import kr.me.seesaw.domain.dto.JsonWebToken;
 import kr.me.seesaw.domain.dto.JwtUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,10 +20,9 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtTokenProvider {
-
-    private final String secretKey;
 
     // 액세스 토큰 만료 시간: 1시간
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60;
@@ -30,7 +30,10 @@ public class JwtTokenProvider {
     // 리프레시 토큰 만료 시간: 14일
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 14;
 
+    private final String secretKey;
+
     public JsonWebToken generateTokenInfo(String userId, String username, Collection<String> authorities) {
+        log.debug("액세스 토큰과 리프레시 토큰을 생성합니다. userId: {}, username: {}, authorities: {}", userId, username, authorities);
         String accessToken = generateAccessToken(userId, username, authorities);
         String refreshToken = generateRefreshToken(userId, username, authorities);
         return new JsonWebToken(accessToken, refreshToken, ACCESS_TOKEN_EXPIRATION);
@@ -40,6 +43,7 @@ public class JwtTokenProvider {
      * 계정 인증 주체 정보를 암호화한 액세스 토큰을 반환합니다.
      */
     private String generateAccessToken(String userId, String username, Collection<String> authorities) {
+        log.debug("액세스 토큰을 생성합니다. userId: {}, username: {}, authorities: {}", userId, username, authorities);
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
@@ -57,6 +61,7 @@ public class JwtTokenProvider {
      * 리프레시 토큰을 생성합니다.
      */
     private String generateRefreshToken(String userId, String username, Collection<String> authorities) {
+        log.debug("리프레시 토큰을 생성합니다. userId: {}, username: {}, authorities: {}", userId, username, authorities);
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION);
         SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
@@ -78,15 +83,19 @@ public class JwtTokenProvider {
      * @return 새로운 토큰 정보 객체
      */
     public JsonWebToken refreshToken(String refreshToken) {
-        // 리프레시 토큰 유효성 검증
+        log.debug("리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다. refreshToken: {}", refreshToken);
+
+        log.debug("리프레시 토큰 유효성 검증을 시작합니다.");
         SecretKey key = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-        // 리프레시 토큰 파싱
+
+        log.debug("리프레시 토큰을 파싱합니다.");
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(refreshToken)
                 .getBody();
-        // 계정 식별자 추출
+
+        log.debug("리프레시 토큰에서 계정 식별자와 권한 정보를 추출합니다.");
         String userId = claims.getSubject();
         String username = claims.get("username", String.class);
         @SuppressWarnings("noinspection unchecked")
@@ -94,9 +103,8 @@ public class JwtTokenProvider {
         if (authorities == null || authorities.isEmpty()) {
             throw new BadCredentialsException("유효하지 않은 리프레시 토큰입니다.");
         }
-        // 새로운 액세스 토큰 생성
+
         String newAccessToken = generateAccessToken(userId, username, authorities);
-        // 새로운 리프레시 토큰 생성 (선택적)
         String newRefreshToken = generateRefreshToken(userId, username, authorities);
         return new JsonWebToken(newAccessToken, newRefreshToken, ACCESS_TOKEN_EXPIRATION);
     }
@@ -108,6 +116,7 @@ public class JwtTokenProvider {
      * @return 인증 객체
      */
     public Authentication validateTokenAndGetAuthentication(String token) {
+        log.debug("JWT 토큰 유효성 검증을 시작합니다.");
         try {
             SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
             Claims claims = Jwts.parserBuilder()

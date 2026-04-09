@@ -80,7 +80,7 @@ class SignApiControllerTest {
     @DisplayName("로그인 요청 시 필수 필드가 누락되면 422 응답코드를 반환한다")
     void signIn_MissingRequiredFields_Returns400() throws Exception {
         // given
-        SignInRequest request = new SignInRequest();
+        SignInRequest request = new SignInRequest(null, null);
 
         // when & then
         mockMvc.perform(post("/api/sign-in")
@@ -130,7 +130,7 @@ class SignApiControllerTest {
     @DisplayName("토큰 갱신 요청 시 리프레시 토큰이 누락되면 422 응답코드를 반환한다")
     void refreshToken_MissingRefreshToken_Returns422() throws Exception {
         // given
-        TokenRefreshRequest request = new TokenRefreshRequest();
+        TokenRefreshRequest request = new TokenRefreshRequest(null);
         // refreshToken 필드를 비워둠
 
         // when & then
