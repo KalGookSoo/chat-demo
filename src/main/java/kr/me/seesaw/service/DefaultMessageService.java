@@ -1,13 +1,12 @@
 package kr.me.seesaw.service;
 
+import kr.me.seesaw.domain.dto.MessageResponse;
+import kr.me.seesaw.domain.dto.SenderResponse;
 import kr.me.seesaw.domain.entity.BaseEntity;
 import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.Message;
-import kr.me.seesaw.domain.vo.MessageType;
 import kr.me.seesaw.domain.entity.User;
-import kr.me.seesaw.domain.dto.MessageResponse;
-import kr.me.seesaw.domain.dto.SenderResponse;
-import kr.me.seesaw.repository.ChatRoomMemberRepository;
+import kr.me.seesaw.domain.vo.MessageType;
 import kr.me.seesaw.repository.ChatRoomRepository;
 import kr.me.seesaw.repository.MessageRepository;
 import kr.me.seesaw.repository.UserRepository;
@@ -45,7 +44,7 @@ public class DefaultMessageService implements MessageService {
         log.info("메시지 생성을 시작합니다. content: {}, senderId: {}, chatRoomId: {}, type: {}, mimeType: {}", content, senderId, chatRoomId, type, mimeType);
         User sender = userRepository.findById(senderId).orElseThrow();
         ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
-        
+
         Message message = new Message();
         message.setContent(content);
         message.setSender(sender);
@@ -74,15 +73,21 @@ public class DefaultMessageService implements MessageService {
                 .stream()
                 .sorted(Comparator.comparing(Message::getCreatedDate))
                 .map(message ->
-                        new MessageResponse(
-                                message.getId(),
-                                message.getChatRoomId(),
-                                message.getContent(),
-                                message.getType(),
-                                message.getMimeType(),
-                                message.getCreatedDate(),
-                                new SenderResponse(message.getSenderId(), users.get(message.getSenderId()).getName())
-                        )
+                        {
+                            SenderResponse sender = SenderResponse.builder()
+                                    .id(message.getSenderId())
+                                    .name(users.get(message.getSenderId()).getName())
+                                    .build();
+                            return MessageResponse.builder()
+                                    .id(message.getId())
+                                    .chatRoomId(message.getChatRoomId())
+                                    .content(message.getContent())
+                                    .type(message.getType())
+                                    .mimeType(message.getMimeType())
+                                    .createdDate(message.getCreatedDate())
+                                    .sender(sender)
+                                    .build();
+                        }
                 ).toList();
         return new PageImpl<>(messageResponses, page.getPageable(), page.getTotalElements());
     }

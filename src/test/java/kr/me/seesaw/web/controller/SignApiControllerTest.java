@@ -42,10 +42,17 @@ class SignApiControllerTest {
     @DisplayName("로그인 요청이 성공하면 JWT 토큰을 반환한다")
     void signIn_Success_ReturnsJwtToken() throws Exception {
         // given
-        SignInRequest request = new SignInRequest("testuser", "password");
+        SignInRequest request = SignInRequest.builder()
+                .username("testuser")
+                .password("password")
+                .build();
 
         // when
-        JsonWebToken expectedToken = new JsonWebToken("access-token", "refresh-token", 3600);
+        JsonWebToken expectedToken = JsonWebToken.builder()
+                .accessToken("access-token")
+                .refreshToken("refresh-token")
+                .expiresIn(3600)
+                .build();
         when(authenticationService.authenticate(any(SignInRequest.class))).thenReturn(expectedToken);
 
         // when & then
@@ -63,7 +70,10 @@ class SignApiControllerTest {
     @DisplayName("로그인 요청 시 유효하지 않은 자격 증명이면 401 응답코드를 반환한다")
     void signIn_InvalidCredentials_Returns401() throws Exception {
         // given
-        SignInRequest request = new SignInRequest("testuser", "password");
+        SignInRequest request = SignInRequest.builder()
+                .username("testuser")
+                .password("password")
+                .build();
 
         when(authenticationService.authenticate(any(SignInRequest.class)))
                 .thenThrow(new BadCredentialsException("사용자명 또는 패스워드가 일치하지 않습니다"));
@@ -80,7 +90,10 @@ class SignApiControllerTest {
     @DisplayName("로그인 요청 시 필수 필드가 누락되면 422 응답코드를 반환한다")
     void signIn_MissingRequiredFields_Returns400() throws Exception {
         // given
-        SignInRequest request = new SignInRequest(null, null);
+        SignInRequest request = SignInRequest.builder()
+                .username(null)
+                .password(null)
+                .build();
 
         // when & then
         mockMvc.perform(post("/api/sign-in")
@@ -94,8 +107,14 @@ class SignApiControllerTest {
     @DisplayName("토큰 갱신 요청이 성공하면 새로운 JWT 토큰을 반환한다")
     void refreshToken_Success_ReturnsNewJwtToken() throws Exception {
         // given
-        TokenRefreshRequest request = new TokenRefreshRequest("valid-refresh-token");
-        JsonWebToken expectedToken = new JsonWebToken("new-access-token", "new-refresh-token", 3600);
+        TokenRefreshRequest request = TokenRefreshRequest.builder()
+                .refreshToken("valid-refresh-token")
+                .build();
+        JsonWebToken expectedToken = JsonWebToken.builder()
+                .accessToken("new-access-token")
+                .refreshToken("new-refresh-token")
+                .expiresIn(3600)
+                .build();
 
         when(authenticationService.refreshToken(anyString())).thenReturn(expectedToken);
 
@@ -114,7 +133,9 @@ class SignApiControllerTest {
     @DisplayName("토큰 갱신 요청 시 유효하지 않은 리프레시 토큰이면 401 응답코드를 반환한다")
     void refreshToken_InvalidRefreshToken_Returns401() throws Exception {
         // given
-        TokenRefreshRequest request = new TokenRefreshRequest("invalid-refresh-token");
+        TokenRefreshRequest request = TokenRefreshRequest.builder()
+                .refreshToken("invalid-refresh-token")
+                .build();
 
         when(authenticationService.refreshToken(anyString()))
                 .thenThrow(new BadCredentialsException("유효하지 않은 리프레시 토큰입니다"));
@@ -130,7 +151,9 @@ class SignApiControllerTest {
     @DisplayName("토큰 갱신 요청 시 리프레시 토큰이 누락되면 422 응답코드를 반환한다")
     void refreshToken_MissingRefreshToken_Returns422() throws Exception {
         // given
-        TokenRefreshRequest request = new TokenRefreshRequest(null);
+        TokenRefreshRequest request = TokenRefreshRequest.builder()
+                .refreshToken(null)
+                .build();
         // refreshToken 필드를 비워둠
 
         // when & then

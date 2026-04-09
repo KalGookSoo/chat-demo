@@ -36,7 +36,11 @@ public class JwtTokenProvider {
         log.debug("액세스 토큰과 리프레시 토큰을 생성합니다. userId: {}, username: {}, authorities: {}", userId, username, authorities);
         String accessToken = generateAccessToken(userId, username, authorities);
         String refreshToken = generateRefreshToken(userId, username, authorities);
-        return new JsonWebToken(accessToken, refreshToken, ACCESS_TOKEN_EXPIRATION);
+        return JsonWebToken.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(ACCESS_TOKEN_EXPIRATION)
+                .build();
     }
 
     /**
@@ -106,7 +110,11 @@ public class JwtTokenProvider {
 
         String newAccessToken = generateAccessToken(userId, username, authorities);
         String newRefreshToken = generateRefreshToken(userId, username, authorities);
-        return new JsonWebToken(newAccessToken, newRefreshToken, ACCESS_TOKEN_EXPIRATION);
+        return JsonWebToken.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(ACCESS_TOKEN_EXPIRATION)
+                .build();
     }
 
     /**

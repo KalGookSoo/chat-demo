@@ -72,15 +72,19 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         Message savedMessage = messageRepository.save(message);
         messageRepository.flush();
 
-        MessageResponse messageResponse = new MessageResponse(
-                savedMessage.getId(),
-                savedMessage.getChatRoomId(),
-                savedMessage.getContent(),
-                savedMessage.getType(),
-                savedMessage.getMimeType(),
-                savedMessage.getCreatedDate(),
-                new SenderResponse(user.getId(), user.getName())
-        );
+        SenderResponse sender = SenderResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .build();
+        MessageResponse messageResponse = MessageResponse.builder()
+                .id(savedMessage.getId())
+                .chatRoomId(savedMessage.getChatRoomId())
+                .content(savedMessage.getContent())
+                .type(savedMessage.getType())
+                .mimeType(savedMessage.getMimeType())
+                .createdDate(savedMessage.getCreatedDate())
+                .sender(sender)
+                .build();
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
         // TODO 서비스 워커 알림
@@ -109,15 +113,18 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         // 메시지 영속화
         User user = userService.getUserByUsername(authentication.getName());
         Message message = messageService.createMessage(textMessage.getPayload(), user.getId(), chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
-        MessageResponse messageResponse = new MessageResponse(
-                message.getId(),
-                message.getChatRoomId(),
-                message.getContent(),
-                message.getType(),
-                message.getMimeType(),
-                message.getCreatedDate(),
-                new SenderResponse(user.getId(), user.getName())
-        );
+        MessageResponse messageResponse = MessageResponse.builder()
+                .id(message.getId())
+                .chatRoomId(message.getChatRoomId())
+                .content(message.getContent())
+                .type(message.getType())
+                .mimeType(message.getMimeType())
+                .createdDate(message.getCreatedDate())
+                .sender(SenderResponse.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .build())
+                .build();
         String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
         // TODO 서비스 워커 알림
@@ -161,15 +168,18 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             Message savedMessage = messageRepository.save(message);
             messageRepository.flush();
 
-            MessageResponse messageResponse = new MessageResponse(
-                    savedMessage.getId(),
-                    savedMessage.getChatRoomId(),
-                    savedMessage.getContent(),
-                    savedMessage.getType(),
-                    savedMessage.getMimeType(),
-                    savedMessage.getCreatedDate(),
-                    new SenderResponse(user.getId(), user.getName())
-            );
+            MessageResponse messageResponse = MessageResponse.builder()
+                    .id(savedMessage.getId())
+                    .chatRoomId(savedMessage.getChatRoomId())
+                    .content(savedMessage.getContent())
+                    .type(savedMessage.getType())
+                    .mimeType(savedMessage.getMimeType())
+                    .createdDate(savedMessage.getCreatedDate())
+                    .sender(SenderResponse.builder()
+                            .id(user.getId())
+                            .name(user.getName())
+                            .build())
+                    .build();
             String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", messageResponse));
             chatSessionManager.broadcastToRoom(userSession.getChatRoomId(), broadcastMessage);
         }
