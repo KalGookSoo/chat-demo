@@ -2,18 +2,18 @@ package kr.me.seesaw.domain.entity;
 
 import jakarta.persistence.*;
 import kr.me.seesaw.domain.vo.MessageType;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
 @Entity
 @Table(name = "tb_message")
 @Comment("메시지")
@@ -22,7 +22,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class Message extends BaseEntity {
 
     @Comment("발신자 식별자")
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", referencedColumnName = "id")
     private User sender;
 
@@ -30,7 +30,7 @@ public class Message extends BaseEntity {
     private String senderId;
 
     @Comment("채팅방 식별자")
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", referencedColumnName = "id")
     private ChatRoom chatRoom;
 

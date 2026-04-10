@@ -45,12 +45,13 @@ public class DefaultMessageService implements MessageService {
         User sender = userRepository.findById(senderId).orElseThrow();
         ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
 
-        Message message = new Message();
-        message.setContent(content);
-        message.setSender(sender);
-        message.setChatRoom(chatRoom);
-        message.setType(type);
-        message.setMimeType(mimeType);
+        Message message = Message.builder()
+                .content(content)
+                .sender(sender)
+                .chatRoom(chatRoom)
+                .type(type)
+                .mimeType(mimeType)
+                .build();
         messageRepository.save(message);
         return message;
     }

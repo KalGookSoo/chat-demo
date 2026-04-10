@@ -1,9 +1,9 @@
 package kr.me.seesaw.service;
 
+import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.ChatRoomMember;
 import kr.me.seesaw.domain.entity.User;
-import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.ChatRoomRepository;
 import kr.me.seesaw.repository.UserRepository;
@@ -35,8 +35,9 @@ public class DefaultChatRoomService implements ChatRoomService {
     @Override
     public void createChatRoom(String name) {
         log.info("채팅방을 생성합니다. name: {}", name);
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.setName(name);
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(name)
+                .build();
         chatRoomRepository.save(chatRoom);
     }
 
@@ -53,9 +54,10 @@ public class DefaultChatRoomService implements ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
         User user = userRepository.getReferenceById(memberId);
 
-        ChatRoomMember chatRoomMember = new ChatRoomMember();
-        chatRoomMember.setChatRoom(chatRoom);
-        chatRoomMember.setUser(user);
+        ChatRoomMember chatRoomMember = ChatRoomMember.builder()
+                .chatRoom(chatRoom)
+                .user(user)
+                .build();
         chatRoomMemberRepository.save(chatRoomMember);
     }
 

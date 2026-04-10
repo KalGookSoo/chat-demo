@@ -62,12 +62,13 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
         chatSessionManager.addSession(session, user.getId(), chatRoomId);
         // 알림
         String content = "선수 입장: " + user.getName();
-        Message message = new Message();
-        message.setContent(content);
-        message.setSenderId(user.getId());
-        message.setChatRoomId(chatRoomId);
-        message.setType(MessageType.NOTIFICATION);
-        message.setMimeType(MediaType.TEXT_PLAIN_VALUE);
+        Message message = Message.builder()
+                .content(content)
+                .senderId(user.getId())
+                .chatRoomId(chatRoomId)
+                .type(MessageType.NOTIFICATION)
+                .mimeType(MediaType.TEXT_PLAIN_VALUE)
+                .build();
 
         Message savedMessage = messageRepository.save(message);
         messageRepository.flush();
@@ -158,12 +159,13 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
             // 알림 전송
             User user = userService.getUserById(userSession.getUserId());
             String exitMessage = "선수 퇴장: " + user.getName();
-            Message message = new Message();
-            message.setContent(exitMessage);
-            message.setSenderId(user.getId());
-            message.setChatRoomId(userSession.getChatRoomId());
-            message.setType(MessageType.NOTIFICATION);
-            message.setMimeType(MediaType.TEXT_PLAIN_VALUE);
+            Message message = Message.builder()
+                    .content(exitMessage)
+                    .senderId(user.getId())
+                    .chatRoomId(userSession.getChatRoomId())
+                    .type(MessageType.NOTIFICATION)
+                    .mimeType(MediaType.TEXT_PLAIN_VALUE)
+                    .build();
 
             Message savedMessage = messageRepository.save(message);
             messageRepository.flush();

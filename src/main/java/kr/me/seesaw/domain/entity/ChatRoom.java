@@ -2,13 +2,17 @@ package kr.me.seesaw.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Getter
 @Entity
 @Table(name = "tb_chat_room")
