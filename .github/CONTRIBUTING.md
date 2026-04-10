@@ -47,7 +47,7 @@ chat-demo 프로젝트의 개발 환경을 설정하려면 [개발 환경 설정
 
 ## 커밋 메시지 가이드라인
 
-chat-demo 프로젝트는 [Conventional Commits](../docs/CONVENTIONAL)COMMITS.md) 명세를 따릅니다. 이 명세는 커밋 메시지에 대한 가벼운 규칙을 제공하여 명시적인 커밋 히스토리를 만들고 자동화된 도구를 더 쉽게 작성할 수 있게 합니다.
+chat-demo 프로젝트는 [Conventional Commits](../docs/CONVENTIONAL_COMMITS.md) 명세를 따릅니다. 이 명세는 커밋 메시지에 대한 가벼운 규칙을 제공하여 명시적인 커밋 히스토리를 만들고 자동화된 도구를 더 쉽게 작성할 수 있게 합니다.
 
 ### 커밋 메시지 구조
 
@@ -69,7 +69,7 @@ chat-demo 프로젝트는 [Conventional Commits](../docs/CONVENTIONAL)COMMITS.md
 - **test**: 테스트 코드 추가 또는 수정
 - **chore**: 빌드 프로세스 또는 보조 도구 및 라이브러리 변경
 
-자세한 내용은 [Conventional Commits 가이드](../docs/CONVENTIONAL)COMMITS.md)를 참조하세요.
+자세한 내용은 [Conventional Commits 가이드](../docs/CONVENTIONAL_COMMITS.md)를 참조하세요.
 
 ## 이슈 제출
 
