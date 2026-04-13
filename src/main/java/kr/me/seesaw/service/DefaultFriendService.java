@@ -34,25 +34,29 @@ public class DefaultFriendService implements FriendService {
     private final PrincipalProvider principalProvider;
 
     @Override
-    public void requestFriend(String friendId) {
+    public void requestFriend(String username) {
         Authentication authentication = principalProvider.getAuthentication();
         String userId = authentication.getDetails().toString();
-        log.info("{}가 {}에게 친구 요청을 보냅니다.", authentication.getName(), friendId);
-        if (userId.equals(friendId)) {
+        log.info("{}가 {}에게 친구 요청을 보냅니다.", authentication.getName(), username);
+
+        User friend = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (userId.equals(friend.getId())) {
             throw new IllegalArgumentException("자기 자신에게 친구 요청을 보낼 수 없습니다.");
         }
 
-        if (friendRepository.existsByUserIdAndFriendId(userId, friendId)) {
+        if (friendRepository.existsByUserIdAndFriendId(userId, friend.getId())) {
             throw new IllegalArgumentException("이미 친구 요청을 보냈거나 친구 상태입니다.");
         }
 
-        if (friendRepository.existsByUserIdAndFriendId(friendId, userId)) {
+        if (friendRepository.existsByUserIdAndFriendId(friend.getId(), userId)) {
             throw new IllegalArgumentException("상대방이 이미 친구 요청을 보냈습니다. 수락해주세요.");
         }
 
         Friend request = Friend.builder()
                 .userId(userId)
-                .friendId(friendId)
+                .friendId(friend.getId())
                 .status(FriendStatus.PENDING)
                 .build();
         friendRepository.save(request);
