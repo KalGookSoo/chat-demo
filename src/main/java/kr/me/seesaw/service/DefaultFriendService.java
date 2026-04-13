@@ -132,22 +132,28 @@ public class DefaultFriendService implements FriendService {
         String userId = authentication.getDetails().toString();
         log.debug("{}의 친구 요청 목록을 조회합니다.", authentication.getName());
 
-        List<Friend> pendingRequests = friendRepository.findByFriendIdAndStatus(userId, FriendStatus.PENDING);
+        List<Friend> pendingRequests = friendRepository.findByUserIdAndStatusOrFriendIdAndStatus(userId, FriendStatus.PENDING, userId, FriendStatus.PENDING);
 
-        Set<String> requesterIds = pendingRequests.stream()
-                .map(Friend::getUserId)
+        if (pendingRequests.isEmpty()) {
+            return List.of();
+        }
+
+        Set<String> friendUserIds = pendingRequests.stream()
+                .flatMap(f -> Stream.of(f.getUserId(), f.getFriendId()))
+                .filter(id -> !id.equals(userId))
                 .collect(Collectors.toSet());
 
-        Map<String, User> userMap = userRepository.findAllByIdIn(requesterIds).stream()
+        Map<String, User> userMap = userRepository.findAllByIdIn(friendUserIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return pendingRequests.stream()
                 .map(f -> {
-                    User requester = userMap.get(f.getUserId());
+                    String targetFriendId = f.getUserId().equals(userId) ? f.getFriendId() : f.getUserId();
+                    User friendUser = userMap.get(targetFriendId);
                     UserResponse friend = UserResponse.builder()
-                            .id(requester.getId())
-                            .username(requester.getUsername())
-                            .name(requester.getName())
+                            .id(friendUser.getId())
+                            .username(friendUser.getUsername())
+                            .name(friendUser.getName())
                             .build();
                     return FriendResponse.builder()
                             .userId(userId)
