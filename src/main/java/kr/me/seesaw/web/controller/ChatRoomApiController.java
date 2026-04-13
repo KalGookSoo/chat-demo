@@ -1,7 +1,9 @@
 package kr.me.seesaw.web.controller;
 
-import kr.me.seesaw.domain.dto.ChatRoomResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.me.seesaw.component.security.PrincipalProvider;
+import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "채팅방 API", description = "채팅방 조회 및 관리를 담당합니다.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chat-rooms")
@@ -22,6 +25,7 @@ public class ChatRoomApiController {
 
     private final PrincipalProvider principalProvider;
 
+    @Operation(summary = "참여 중인 채팅방 목록 조회", description = "현재 로그인한 사용자가 참여 중인 채팅방 목록을 반환합니다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<Map<String, List<ChatRoomResponse>>> getChatRooms() {

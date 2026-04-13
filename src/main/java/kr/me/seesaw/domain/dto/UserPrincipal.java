@@ -1,5 +1,6 @@
 package kr.me.seesaw.domain.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import kr.me.seesaw.domain.entity.Role;
 import kr.me.seesaw.domain.entity.User;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Builder
+@Schema(hidden = true)
 public record UserPrincipal(User user) implements UserDetails {
 
     public String getUserId() {
