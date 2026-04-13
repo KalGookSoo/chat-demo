@@ -21,15 +21,21 @@ public class DefaultUserService implements UserService {
 
     @Override
     public void createDemoUsers() {
-        if (userRepository.findByUsername("tester1").isEmpty()) {
-            User user1 = User.create("tester1", passwordEncoder.encode("1234"), "테스터1");
-            Role role1 = new Role("ROLE_CLIENT", "의뢰인");
+        if (userRepository.findByUsername("admin").isEmpty()) {
+            User user1 = User.create("admin", passwordEncoder.encode("1234"), "최고관리자");
+            Role role1 = new Role("ROLE_ADMIN", "최고관리자");
             user1.addRole(role1);
             userRepository.save(user1);
         }
-        if (userRepository.findByUsername("tester2").isEmpty()) {
-            User user2 = User.create("tester2", passwordEncoder.encode("1234"), "테스터2");
-            Role role2 = new Role("ROLE_LAWYER", "변호사");
+        if (userRepository.findByUsername("manager1").isEmpty()) {
+            User user2 = User.create("manager1", passwordEncoder.encode("1234"), "관리자1");
+            Role role2 = new Role("ROLE_MANAGER", "관리자");
+            user2.addRole(role2);
+            userRepository.save(user2);
+        }
+        if (userRepository.findByUsername("testuser1").isEmpty()) {
+            User user2 = User.create("testuser1", passwordEncoder.encode("1234"), "테스트유저1");
+            Role role2 = new Role("ROLE_USER", "일반사용자");
             user2.addRole(role2);
             userRepository.save(user2);
         }
@@ -39,7 +45,7 @@ public class DefaultUserService implements UserService {
     public void createUser(String username, String password, String name) {
         String encodedPassword = passwordEncoder.encode(password);
         User user = User.create(username, encodedPassword, name);
-        Role role = new Role("ROLE_CLIENT", "의뢰인");
+        Role role = new Role("ROLE_USER", "일반사용자");
         user.addRole(role);
         userRepository.save(user);
     }
