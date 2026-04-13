@@ -27,14 +27,6 @@ public class DefaultChatRoomService implements ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Override
-    public void createDemoChatRooms() {
-        if (chatRoomRepository.findAll().isEmpty()) {
-            createChatRoom("채팅방1");
-            createChatRoom("채팅방2");
-        }
-    }
-
-    @Override
     public void createChatRoom(String name) {
         log.info("채팅방을 생성합니다. name: {}", name);
         ChatRoom chatRoom = ChatRoom.builder()

@@ -20,34 +20,6 @@ public class DefaultUserService implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void createDemoUsers() {
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            User user = User.create("admin", passwordEncoder.encode("1234"), "최고관리자");
-            Role role = new Role("ROLE_ADMIN", "최고관리자");
-            user.addRole(role);
-            userRepository.save(user);
-        }
-        if (userRepository.findByUsername("manager1").isEmpty()) {
-            User user = User.create("manager1", passwordEncoder.encode("1234"), "관리자1");
-            Role role = new Role("ROLE_MANAGER", "관리자");
-            user.addRole(role);
-            userRepository.save(user);
-        }
-        if (userRepository.findByUsername("testuser1").isEmpty()) {
-            User user = User.create("testuser1", passwordEncoder.encode("1234"), "테스트유저1");
-            Role role = new Role("ROLE_USER", "일반사용자");
-            user.addRole(role);
-            userRepository.save(user);
-        }
-        if (userRepository.findByUsername("testuser2").isEmpty()) {
-            User user = User.create("testuser2", passwordEncoder.encode("1234"), "테스트유저2");
-            Role role = new Role("ROLE_USER", "일반사용자");
-            user.addRole(role);
-            userRepository.save(user);
-        }
-    }
-
-    @Override
     public void createUser(String username, String password, String name) {
         String encodedPassword = passwordEncoder.encode(password);
         User user = User.create(username, encodedPassword, name);

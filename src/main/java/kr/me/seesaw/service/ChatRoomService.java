@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface ChatRoomService {
 
-    void createDemoChatRooms();
-
     void createChatRoom(String name);
 
     List<ChatRoom> getAllChatRooms();

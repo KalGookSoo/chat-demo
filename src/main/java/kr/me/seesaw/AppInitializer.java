@@ -11,16 +11,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppInitializer implements CommandLineRunner {
 
+    private final DemoDataLoader demoDataLoader;
+
     private final UserService userService;
 
     private final ChatRoomService chatRoomService;
 
     @Override
     public void run(String... args) {
-        userService.createDemoUsers();
-        User tester1 = userService.getUserByUsername("tester1");
-        User tester2 = userService.getUserByUsername("tester2");
-        chatRoomService.createDemoChatRooms();
+        demoDataLoader.createDemoUsers();
+        User tester1 = userService.getUserByUsername("testuser1");
+        User tester2 = userService.getUserByUsername("testuser2");
+        demoDataLoader.createDemoChatRooms();
         chatRoomService.getAllChatRooms().forEach(chatRoom -> {
             chatRoomService.addMember(chatRoom.getId(), tester1.getId());
             chatRoomService.addMember(chatRoom.getId(), tester2.getId());
