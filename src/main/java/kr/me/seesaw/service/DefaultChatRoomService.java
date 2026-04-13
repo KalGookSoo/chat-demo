@@ -28,8 +28,10 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     @Override
     public void createDemoChatRooms() {
-        createChatRoom("채팅방1");
-        createChatRoom("채팅방2");
+        if (chatRoomRepository.findAll().isEmpty()) {
+            createChatRoom("채팅방1");
+            createChatRoom("채팅방2");
+        }
     }
 
     @Override
@@ -50,6 +52,10 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     @Override
     public void addMember(String chatRoomId, String memberId) {
+        if (chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoomId, memberId).isPresent()) {
+            log.info("이미 채팅방에 존재하는 멤버입니다. chatRoomId: {}, memberId: {}", chatRoomId, memberId);
+            return;
+        }
         log.info("채팅방에 멤버를 추가합니다. chatRoomId: {}, memberId: {}", chatRoomId, memberId);
         ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
         User user = userRepository.getReferenceById(memberId);

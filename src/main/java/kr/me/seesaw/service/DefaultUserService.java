@@ -21,14 +21,18 @@ public class DefaultUserService implements UserService {
 
     @Override
     public void createDemoUsers() {
-        User user1 = User.create("tester1", passwordEncoder.encode("1234"), "테스터1");
-        Role role1 = new Role("ROLE_CLIENT", "의뢰인");
-        user1.addRole(role1);
-        userRepository.save(user1);
-        User user2 = User.create("tester2", passwordEncoder.encode("1234"), "테스터2");
-        Role role2 = new Role("ROLE_LAWYER", "변호사");
-        user2.addRole(role2);
-        userRepository.save(user2);
+        if (userRepository.findByUsername("tester1").isEmpty()) {
+            User user1 = User.create("tester1", passwordEncoder.encode("1234"), "테스터1");
+            Role role1 = new Role("ROLE_CLIENT", "의뢰인");
+            user1.addRole(role1);
+            userRepository.save(user1);
+        }
+        if (userRepository.findByUsername("tester2").isEmpty()) {
+            User user2 = User.create("tester2", passwordEncoder.encode("1234"), "테스터2");
+            Role role2 = new Role("ROLE_LAWYER", "변호사");
+            user2.addRole(role2);
+            userRepository.save(user2);
+        }
     }
 
     @Override

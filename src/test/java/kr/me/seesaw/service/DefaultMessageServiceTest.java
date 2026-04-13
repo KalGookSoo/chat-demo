@@ -1,6 +1,5 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.entity.BaseEntity;
 import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.Message;
 import kr.me.seesaw.domain.entity.User;
@@ -19,11 +18,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
 @ActiveProfiles({"test"})
 @DataJpaTest
 class DefaultMessageServiceTest {
+
     @Autowired
     private TestEntityManager entityManager;
 
@@ -47,14 +45,13 @@ class DefaultMessageServiceTest {
     }
 
     @Test
-    @DisplayName("메시지 저장 시 메지리를 반환해야 한다")
+    @DisplayName("메시지 저장 시 메시지를 반환해야 한다")
     void createMessageShouldReturnMessage() {
         // given
         User user = User.create("testuser", "password", "Test User");
         entityManager.persist(user);
 
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.setName("Test Chat Room");
+        ChatRoom chatRoom = ChatRoom.builder().name("Test Chat Room").build();
         entityManager.persist(chatRoom);
 
         String content = "content";
@@ -70,4 +67,5 @@ class DefaultMessageServiceTest {
         // then
         Assertions.assertEquals(content, message.getContent());
     }
+
 }
