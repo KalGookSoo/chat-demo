@@ -22,22 +22,28 @@ public class DefaultUserService implements UserService {
     @Override
     public void createDemoUsers() {
         if (userRepository.findByUsername("admin").isEmpty()) {
-            User user1 = User.create("admin", passwordEncoder.encode("1234"), "최고관리자");
-            Role role1 = new Role("ROLE_ADMIN", "최고관리자");
-            user1.addRole(role1);
-            userRepository.save(user1);
+            User user = User.create("admin", passwordEncoder.encode("1234"), "최고관리자");
+            Role role = new Role("ROLE_ADMIN", "최고관리자");
+            user.addRole(role);
+            userRepository.save(user);
         }
         if (userRepository.findByUsername("manager1").isEmpty()) {
-            User user2 = User.create("manager1", passwordEncoder.encode("1234"), "관리자1");
-            Role role2 = new Role("ROLE_MANAGER", "관리자");
-            user2.addRole(role2);
-            userRepository.save(user2);
+            User user = User.create("manager1", passwordEncoder.encode("1234"), "관리자1");
+            Role role = new Role("ROLE_MANAGER", "관리자");
+            user.addRole(role);
+            userRepository.save(user);
         }
         if (userRepository.findByUsername("testuser1").isEmpty()) {
-            User user2 = User.create("testuser1", passwordEncoder.encode("1234"), "테스트유저1");
-            Role role2 = new Role("ROLE_USER", "일반사용자");
-            user2.addRole(role2);
-            userRepository.save(user2);
+            User user = User.create("testuser1", passwordEncoder.encode("1234"), "테스트유저1");
+            Role role = new Role("ROLE_USER", "일반사용자");
+            user.addRole(role);
+            userRepository.save(user);
+        }
+        if (userRepository.findByUsername("testuser2").isEmpty()) {
+            User user = User.create("testuser2", passwordEncoder.encode("1234"), "테스트유저2");
+            Role role = new Role("ROLE_USER", "일반사용자");
+            user.addRole(role);
+            userRepository.save(user);
         }
     }
 
