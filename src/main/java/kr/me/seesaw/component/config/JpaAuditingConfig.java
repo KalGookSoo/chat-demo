@@ -17,7 +17,9 @@ public class JpaAuditingConfig implements AuditorAware<String> {
     @NonNull
     public Optional<String> getCurrentAuditor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return Optional.ofNullable(authentication).map(Authentication::getName);
+        return Optional.ofNullable(authentication)
+                .map(Authentication::getDetails)
+                .map(Object::toString);
     }
 
 }

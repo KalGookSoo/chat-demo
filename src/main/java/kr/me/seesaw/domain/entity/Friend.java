@@ -25,19 +25,19 @@ import static lombok.AccessLevel.PROTECTED;
 public class Friend extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     @Comment("나")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "friend_id", nullable = false)
+    @JoinColumn(name = "friend_id", insertable = false, updatable = false)
     @Comment("친구")
     private User friend;
 
-    @Column(name = "user_id", length = 36, insertable = false, updatable = false, nullable = false)
+    @Column(name = "user_id", length = 36, nullable = false)
     private String userId;
 
-    @Column(name = "friend_id", length = 36, insertable = false, updatable = false, nullable = false)
+    @Column(name = "friend_id", length = 36, nullable = false)
     private String friendId;
 
     @Enumerated(EnumType.STRING)
