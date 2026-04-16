@@ -4,11 +4,13 @@ import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.ChatRoomMember;
 import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.event.ChatRoomCreatedEvent;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
 import kr.me.seesaw.repository.ChatRoomRepository;
 import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,8 @@ public class DefaultChatRoomService implements ChatRoomService {
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     @Override
     public void createChatRoom(String name) {
         log.info("채팅방을 생성합니다. name: {}", name);
@@ -33,6 +37,19 @@ public class DefaultChatRoomService implements ChatRoomService {
                 .name(name)
                 .build();
         chatRoomRepository.save(chatRoom);
+    }
+
+    @Override
+    public ChatRoom createChatRoom(String name, String creatorId, List<String> friendIds) {
+        log.info("채팅방을 생성하고 친구를 초대합니다. name: {}, creatorId: {}, friendCount: {}", name, creatorId, friendIds == null ? 0 : friendIds.size());
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(name)
+                .build();
+        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+
+        eventPublisher.publishEvent(new ChatRoomCreatedEvent(savedChatRoom.getId(), creatorId, friendIds));
+
+        return savedChatRoom;
     }
 
     @Transactional(readOnly = true)

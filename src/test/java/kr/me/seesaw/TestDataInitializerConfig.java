@@ -1,6 +1,10 @@
 package kr.me.seesaw;
 
 import jakarta.persistence.EntityManager;
+import kr.me.seesaw.domain.entity.Friend;
+import kr.me.seesaw.domain.entity.Role;
+import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.domain.vo.FriendStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -28,6 +32,35 @@ public class TestDataInitializerConfig {
             @Transactional
             public void run(ApplicationArguments args) {
                 LOGGER.info("테스트 데이터 초기화 시작");
+
+                // 기본 역할 생성
+                Role userRole = new Role("ROLE_USER", "일반 사용자");
+                entityManager.persist(userRole);
+
+                // 테스트 유저 1 (생성자용)
+                User user1 = User.create("user1", "pass1", "사용자1");
+                user1.addRole(userRole);
+                entityManager.persist(user1);
+
+                // 테스트 유저 2 (친구용)
+                User user2 = User.create("user2", "pass2", "사용자2");
+                user2.addRole(userRole);
+                entityManager.persist(user2);
+
+                // 테스트 유저 3 (친구 아닌 사람)
+                User user3 = User.create("user3", "pass3", "사용자3");
+                user3.addRole(userRole);
+                entityManager.persist(user3);
+
+                // 친구 관계 설정 (user1 <-> user2)
+                Friend friend = Friend.builder()
+                        .userId(user1.getId())
+                        .friendId(user2.getId())
+                        .status(FriendStatus.ACCEPTED)
+                        .build();
+                entityManager.persist(friend);
+
+                LOGGER.info("테스트 데이터 초기화 완료");
             }
         };
     }

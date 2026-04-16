@@ -9,7 +9,7 @@ public interface ChatRoomRepository extends Repository<ChatRoom, String> {
 
     List<ChatRoom> findAll();
 
-    void save(ChatRoom chatRoom);
+    ChatRoom save(ChatRoom chatRoom);
 
     ChatRoom getReferenceById(String id);
 

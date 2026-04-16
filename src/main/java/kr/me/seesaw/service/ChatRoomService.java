@@ -1,13 +1,15 @@
 package kr.me.seesaw.service;
 
-import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.dto.ChatRoomResponse;
+import kr.me.seesaw.domain.entity.ChatRoom;
 
 import java.util.List;
 
 public interface ChatRoomService {
 
     void createChatRoom(String name);
+
+    ChatRoom createChatRoom(String name, String creatorId, List<String> friendIds);
 
     List<ChatRoom> getAllChatRooms();
 
