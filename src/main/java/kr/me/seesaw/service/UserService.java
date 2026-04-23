@@ -18,4 +18,6 @@ public interface UserService {
 
     List<UserResponse> searchUsers(UserSearch search);
 
+    void changePassword(String userId, String newPassword);
+
 }

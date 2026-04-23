@@ -86,4 +86,10 @@ public class DefaultUserService implements UserService {
                 .toList();
     }
 
+    @Override
+    public void changePassword(String userId, String newPassword) {
+        User user = userRepository.getReferenceById(userId);
+        user.changePassword(passwordEncoder.encode(newPassword));
+    }
+
 }

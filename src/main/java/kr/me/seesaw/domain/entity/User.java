@@ -68,6 +68,11 @@ public class User extends BaseEntity {
         return user;
     }
 
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+        this.credentialsExpiredDate = LocalDate.now().atTime(LocalTime.MIDNIGHT).plusDays(180L);
+    }
+
     /**
      * 만료 일시는 금일(00:00)로부터 2년 후 까지로 설정합니다.
      * 패스워드 만료 일시는 생성일(00:00)로부터 180일 후 까지로 설정합니다.
