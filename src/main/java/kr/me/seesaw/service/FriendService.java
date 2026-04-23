@@ -14,6 +14,4 @@ public interface FriendService {
 
     List<FriendResponse> getFriends();
 
-    List<FriendResponse> getPendingRequests();
-
 }

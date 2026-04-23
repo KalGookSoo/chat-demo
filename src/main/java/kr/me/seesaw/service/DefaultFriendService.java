@@ -97,7 +97,10 @@ public class DefaultFriendService implements FriendService {
         String userId = authentication.getDetails().toString();
         log.debug("{}의 친구 목록을 조회합니다.", authentication.getName());
 
-        List<Friend> friends = friendRepository.findByUserIdAndStatusOrFriendIdAndStatus(userId, FriendStatus.ACCEPTED, userId, FriendStatus.ACCEPTED);
+        List<Friend> friends = friendRepository.findByUserIdOrFriendId(userId, userId);
+        if (friends.isEmpty()) {
+            return List.of();
+        }
 
         Set<String> friendUserIds = friends.stream()
                 .flatMap(f -> Stream.of(f.getUserId(), f.getFriendId()))
@@ -108,45 +111,6 @@ public class DefaultFriendService implements FriendService {
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return friends.stream()
-                .map(f -> {
-                    String targetFriendId = f.getUserId().equals(userId) ? f.getFriendId() : f.getUserId();
-                    User friendUser = userMap.get(targetFriendId);
-                    UserResponse friend = UserResponse.builder()
-                            .id(friendUser.getId())
-                            .username(friendUser.getUsername())
-                            .name(friendUser.getName())
-                            .build();
-                    return FriendResponse.builder()
-                            .userId(userId)
-                            .friend(friend)
-                            .status(f.getStatus())
-                            .build();
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<FriendResponse> getPendingRequests() {
-        Authentication authentication = principalProvider.getAuthentication();
-        String userId = authentication.getDetails().toString();
-        log.debug("{}의 친구 요청 목록을 조회합니다.", authentication.getName());
-
-        List<Friend> pendingRequests = friendRepository.findByUserIdAndStatusOrFriendIdAndStatus(userId, FriendStatus.PENDING, userId, FriendStatus.PENDING);
-
-        if (pendingRequests.isEmpty()) {
-            return List.of();
-        }
-
-        Set<String> friendUserIds = pendingRequests.stream()
-                .flatMap(f -> Stream.of(f.getUserId(), f.getFriendId()))
-                .filter(id -> !id.equals(userId))
-                .collect(Collectors.toSet());
-
-        Map<String, User> userMap = userRepository.findAllByIdIn(friendUserIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-
-        return pendingRequests.stream()
                 .map(f -> {
                     String targetFriendId = f.getUserId().equals(userId) ? f.getFriendId() : f.getUserId();
                     User friendUser = userMap.get(targetFriendId);

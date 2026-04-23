@@ -46,16 +46,10 @@ public class FriendApiController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "친구 목록 조회", description = "수락된 친구 목록을 조회합니다.")
+    @Operation(summary = "친구 목록 조회", description = "친구 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<List<FriendResponse>> getFriends() {
         return ResponseEntity.ok(friendService.getFriends());
-    }
-
-    @Operation(summary = "대기 중인 요청 조회", description = "나에게 온 친구 요청 목록을 조회합니다.")
-    @GetMapping("/pending")
-    public ResponseEntity<List<FriendResponse>> getPendingRequests() {
-        return ResponseEntity.ok(friendService.getPendingRequests());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
