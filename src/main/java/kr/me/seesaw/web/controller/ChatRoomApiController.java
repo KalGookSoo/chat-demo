@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "채팅방 API", description = "채팅방 조회 및 관리를 담당합니다.")
 @RestController
@@ -29,12 +28,12 @@ public class ChatRoomApiController {
     @Operation(summary = "참여 중인 채팅방 목록 조회", description = "현재 로그인한 사용자가 참여 중인 채팅방 목록을 반환합니다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping
-    public ResponseEntity<Map<String, List<ChatRoomResponse>>> getChatRooms() {
+    public ResponseEntity<List<ChatRoomResponse>> getChatRooms() {
         String userId = principalProvider.getAuthentication()
                 .getDetails()
                 .toString();
         List<ChatRoomResponse> chatRooms = chatRoomService.getChatRoomsByUserId(userId);
-        return ResponseEntity.ok(Map.of("chatRooms", chatRooms));
+        return ResponseEntity.ok(chatRooms);
     }
 
     @Operation(summary = "채팅방 생성", description = "새로운 채팅방을 생성하고 친구들을 초대합니다.")
