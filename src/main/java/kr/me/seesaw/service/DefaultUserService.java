@@ -6,6 +6,7 @@ import kr.me.seesaw.domain.entity.Role;
 import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -27,6 +29,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     public void createUser(String username, String password, String name) {
+        log.info("사용자를 생성합니다. username: {}, name: {}", username, name);
         String encodedPassword = passwordEncoder.encode(password);
         User user = User.create(username, encodedPassword, name);
         Role role = new Role("ROLE_USER", "일반사용자");
@@ -37,12 +40,14 @@ public class DefaultUserService implements UserService {
     @Transactional(readOnly = true)
     @Override
     public User getUserByUsername(String username) {
+        log.debug("사용자를 조회합니다. username: {}", username);
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다. username: " + username));
     }
 
     @Override
     public User getUserById(String id) {
+        log.debug("사용자를 조회합니다. id: {}", id);
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다. id: " + id));
     }
@@ -50,6 +55,7 @@ public class DefaultUserService implements UserService {
     @Transactional(readOnly = true)
     @Override
     public UserResponse getUser(String id) {
+        log.debug("사용자 정보를 조회합니다. id: {}", id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다. id: " + id));
 
@@ -57,6 +63,7 @@ public class DefaultUserService implements UserService {
                 .stream()
                 .map(Role::getName)
                 .collect(Collectors.toSet());
+        log.debug("사용자의 역할 목록: {}", roleNames);
 
         return UserResponse.from(user)
                 .roles(roleNames)
@@ -66,6 +73,7 @@ public class DefaultUserService implements UserService {
     @Transactional(readOnly = true)
     @Override
     public List<UserResponse> searchUsers(UserSearch search) {
+        log.debug("사용자를 검색합니다. username: {}, name: {}", search.username(), search.name());
         List<User> users;
         boolean hasUsername = StringUtils.hasText(search.username());
         boolean hasName = StringUtils.hasText(search.name());
@@ -88,6 +96,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     public void changePassword(String userId, String newPassword) {
+        log.info("패스워드를 변경합니다. userId: {}, newPassword: {}", userId, newPassword);
         User user = userRepository.getReferenceById(userId);
         user.changePassword(passwordEncoder.encode(newPassword));
     }
