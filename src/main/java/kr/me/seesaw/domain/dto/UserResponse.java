@@ -5,6 +5,7 @@ import kr.me.seesaw.domain.entity.User;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Builder
 @Schema(description = "사용자 정보 응답")
@@ -24,10 +25,12 @@ public record UserResponse(
         @Schema(description = "잠금 일시")
         LocalDateTime lockedDate,
         @Schema(description = "패스워드 만료 일시")
-        LocalDateTime credentialsExpiredDate
+        LocalDateTime credentialsExpiredDate,
+        @Schema(description = "권한 목록")
+        Set<String> roles
 ) {
 
-    public static UserResponse from(User user) {
+    public static UserResponseBuilder from(User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -36,8 +39,7 @@ public record UserResponse(
                 .contactNumber(user.getContactNumber())
                 .expiredDate(user.getExpiredDate())
                 .lockedDate(user.getLockedDate())
-                .credentialsExpiredDate(user.getCredentialsExpiredDate())
-                .build();
+                .credentialsExpiredDate(user.getCredentialsExpiredDate());
     }
 
 }

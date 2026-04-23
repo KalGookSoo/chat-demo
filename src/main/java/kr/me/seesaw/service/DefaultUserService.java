@@ -13,6 +13,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -47,6 +49,22 @@ public class DefaultUserService implements UserService {
 
     @Transactional(readOnly = true)
     @Override
+    public UserResponse getUser(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다. id: " + id));
+
+        Set<String> roleNames = user.getRoles()
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+
+        return UserResponse.from(user)
+                .roles(roleNames)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<UserResponse> searchUsers(UserSearch search) {
         List<User> users;
         boolean hasUsername = StringUtils.hasText(search.username());
@@ -64,6 +82,7 @@ public class DefaultUserService implements UserService {
 
         return users.stream()
                 .map(UserResponse::from)
+                .map(UserResponse.UserResponseBuilder::build)
                 .toList();
     }
 

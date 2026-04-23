@@ -14,6 +14,8 @@ public interface UserService {
 
     User getUserById(String id);
 
+    UserResponse getUser(String id);
+
     List<UserResponse> searchUsers(UserSearch search);
 
 }
