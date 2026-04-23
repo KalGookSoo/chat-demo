@@ -21,4 +21,10 @@ public interface UserRepository extends Repository<User, String> {
 
     User getReferenceById(String id);
 
+    List<User> findAllByUsernameContaining(String username);
+
+    List<User> findAllByNameContaining(String name);
+
+    List<User> findAllByUsernameContainingOrNameContaining(String username, String name);
+
 }

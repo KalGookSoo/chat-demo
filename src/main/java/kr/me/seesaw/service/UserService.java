@@ -1,6 +1,10 @@
 package kr.me.seesaw.service;
 
+import kr.me.seesaw.domain.dto.UserResponse;
+import kr.me.seesaw.domain.dto.UserSearch;
 import kr.me.seesaw.domain.entity.User;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -9,5 +13,7 @@ public interface UserService {
     User getUserByUsername(String username);
 
     User getUserById(String id);
+
+    List<UserResponse> searchUsers(UserSearch search);
 
 }

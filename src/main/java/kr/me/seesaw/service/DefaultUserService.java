@@ -1,5 +1,7 @@
 package kr.me.seesaw.service;
 
+import kr.me.seesaw.domain.dto.UserResponse;
+import kr.me.seesaw.domain.dto.UserSearch;
 import kr.me.seesaw.domain.entity.Role;
 import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.repository.UserRepository;
@@ -7,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
@@ -39,6 +43,28 @@ public class DefaultUserService implements UserService {
     public User getUserById(String id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다. id: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<UserResponse> searchUsers(UserSearch search) {
+        List<User> users;
+        boolean hasUsername = StringUtils.hasText(search.username());
+        boolean hasName = StringUtils.hasText(search.name());
+
+        if (hasUsername && hasName) {
+            users = userRepository.findAllByUsernameContainingOrNameContaining(search.username(), search.name());
+        } else if (hasUsername) {
+            users = userRepository.findAllByUsernameContaining(search.username());
+        } else if (hasName) {
+            users = userRepository.findAllByNameContaining(search.name());
+        } else {
+            return List.of();
+        }
+
+        return users.stream()
+                .map(UserResponse::from)
+                .toList();
     }
 
 }
