@@ -15,6 +15,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -31,6 +32,8 @@ public class JwtTokenProvider {
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 14;
 
     private final String secretKey;
+
+    private final TokenRevocationService tokenRevocationService;
 
     public JsonWebToken generateTokenInfo(String userId, String username, Collection<String> authorities) {
         log.debug("액세스 토큰과 리프레시 토큰을 생성합니다. userId: {}, username: {}, authorities: {}", userId, username, authorities);
@@ -88,16 +91,13 @@ public class JwtTokenProvider {
      */
     public JsonWebToken refreshToken(String refreshToken) {
         log.debug("리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다. refreshToken: {}", refreshToken);
+        if (tokenRevocationService.isRevoked(refreshToken)) {
+            throw new BadCredentialsException("폐기된 리프레시 토큰입니다.");
+        }
 
         log.debug("리프레시 토큰 유효성 검증을 시작합니다.");
-        SecretKey key = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-
         log.debug("리프레시 토큰을 파싱합니다.");
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(refreshToken)
-                .getBody();
+        Claims claims = parseClaims(refreshToken);
 
         log.debug("리프레시 토큰에서 계정 식별자와 권한 정보를 추출합니다.");
         String userId = claims.getSubject();
@@ -126,12 +126,11 @@ public class JwtTokenProvider {
     public Authentication validateTokenAndGetAuthentication(String token) {
         log.debug("JWT 토큰 유효성 검증을 시작합니다.");
         try {
-            SecretKey secretKey = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            if (tokenRevocationService.isRevoked(token)) {
+                throw new BadCredentialsException("폐기된 JWT 토큰입니다.");
+            }
+
+            Claims claims = parseClaims(token);
             String userId = claims.getSubject();
             String username = claims.get("username", String.class);
             Collection<?> authorities = claims.get("authorities", Collection.class);
@@ -154,6 +153,23 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException e) {
             throw new BadCredentialsException("JWT 토큰이 비어있습니다.");
         }
+    }
+
+    public void revoke(String token) {
+        log.info("토큰을 파기합니다. token: {}", token);
+        Claims claims = parseClaims(token);
+        Date expiration = claims.getExpiration();
+        Instant expiresAt = expiration == null ? null : expiration.toInstant();
+        tokenRevocationService.revoke(token, expiresAt);
+    }
+
+    private Claims parseClaims(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(this.secretKey.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 }

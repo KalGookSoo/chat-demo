@@ -1,9 +1,10 @@
 package kr.me.seesaw.component.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.me.seesaw.component.security.JwtTokenProvider;
 import kr.me.seesaw.component.security.PrincipalProvider;
 import kr.me.seesaw.component.security.SecurityPrincipalProvider;
-import kr.me.seesaw.component.security.JwtTokenProvider;
+import kr.me.seesaw.component.security.TokenRevocationService;
 import kr.me.seesaw.web.filter.JwtAuthenticationFilter;
 import kr.me.seesaw.web.interceptor.ChatHandshakeInterceptor;
 import kr.me.seesaw.web.interceptor.JwtHandshakeInterceptor;
@@ -36,8 +37,8 @@ import java.util.Collections;
 public class SecurityConfig {
 
     @Bean
-    public JwtTokenProvider jwtTokenProvider(@Value("${jwt.secret.key}") String secretKey) {
-        return new JwtTokenProvider(secretKey);
+    public JwtTokenProvider jwtTokenProvider(@Value("${jwt.secret.key}") String secretKey, TokenRevocationService tokenRevocationService) {
+        return new JwtTokenProvider(secretKey, tokenRevocationService);
     }
 
     @Bean

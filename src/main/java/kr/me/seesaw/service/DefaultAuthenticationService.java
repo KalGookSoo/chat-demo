@@ -15,6 +15,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -65,6 +66,17 @@ public class DefaultAuthenticationService implements AuthenticationService {
     public JsonWebToken refreshToken(String refreshToken) {
         log.debug("리프레시 토큰을 재발급합니다.");
         return jwtTokenProvider.refreshToken(refreshToken);
+    }
+
+    @Override
+    public void revokeTokens(String accessToken, String refreshToken) {
+        if (StringUtils.hasText(accessToken)) {
+            jwtTokenProvider.revoke(accessToken);
+        }
+
+        if (StringUtils.hasText(refreshToken)) {
+            jwtTokenProvider.revoke(refreshToken);
+        }
     }
 
 }

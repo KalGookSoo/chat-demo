@@ -4,15 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import kr.me.seesaw.domain.dto.JsonWebToken;
-import kr.me.seesaw.domain.dto.SignInRequest;
-import kr.me.seesaw.domain.dto.SignUpRequest;
-import kr.me.seesaw.domain.dto.TokenRefreshRequest;
+import kr.me.seesaw.domain.dto.*;
 import kr.me.seesaw.service.AuthenticationService;
 import kr.me.seesaw.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +50,15 @@ public class SignApiController {
     public ResponseEntity<JsonWebToken> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         JsonWebToken response = authenticationService.refreshToken(request.refreshToken());
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "로그아웃", description = "액세스 토큰과 리프레시 토큰을 파기합니다.")
+    @ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/sign-out")
+    public ResponseEntity<Void> signOut(@Valid @RequestBody TokenRevokeRequest request) {
+        authenticationService.revokeTokens(request.accessToken(), request.refreshToken());
+        return ResponseEntity.ok().build();
     }
 
 }

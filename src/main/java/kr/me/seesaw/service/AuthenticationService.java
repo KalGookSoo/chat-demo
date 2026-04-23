@@ -9,4 +9,6 @@ public interface AuthenticationService {
 
     JsonWebToken refreshToken(String refreshToken);
 
+    void revokeTokens(String accessToken, String refreshToken);
+
 }
