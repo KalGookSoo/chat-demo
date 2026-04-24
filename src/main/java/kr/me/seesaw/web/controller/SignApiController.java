@@ -39,8 +39,8 @@ public class SignApiController {
     @ApiResponse(responseCode = "401", description = "인증 실패")
     @PostMapping("/sign-in")
     public ResponseEntity<JsonWebToken> signIn(@Valid @RequestBody SignInRequest request) {
-        JsonWebToken response = authenticationService.authenticate(request);
-        return ResponseEntity.ok(response);
+        JsonWebToken token = authenticationService.authenticate(request);
+        return ResponseEntity.ok(token);
     }
 
     @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.")
@@ -48,8 +48,8 @@ public class SignApiController {
     @ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰")
     @PostMapping("/token/refresh")
     public ResponseEntity<JsonWebToken> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
-        JsonWebToken response = authenticationService.refreshToken(request.refreshToken());
-        return ResponseEntity.ok(response);
+        JsonWebToken token = authenticationService.refreshToken(request.refreshToken());
+        return ResponseEntity.ok(token);
     }
 
     @Operation(summary = "로그아웃", description = "액세스 토큰과 리프레시 토큰을 파기합니다.")

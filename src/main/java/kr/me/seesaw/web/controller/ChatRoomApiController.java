@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import kr.me.seesaw.component.security.PrincipalProvider;
 import kr.me.seesaw.domain.dto.ChatRoomCreateRequest;
 import kr.me.seesaw.domain.dto.ChatRoomResponse;
-import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +31,18 @@ public class ChatRoomApiController {
         String userId = principalProvider.getAuthentication()
                 .getDetails()
                 .toString();
+
         List<ChatRoomResponse> chatRooms = chatRoomService.getChatRoomsByUserId(userId);
+
         return ResponseEntity.ok(chatRooms);
+    }
+
+    @Operation(summary = "채팅방 상세 조회", description = "특정 채팅방의 상세 정보와 참여자 목록을 조회합니다.")
+    @PreAuthorize("isAuthenticated() and @chatRoomContext.isMember(#chatRoomId, authentication.details)")
+    @GetMapping("/{chatRoomId}")
+    public ResponseEntity<ChatRoomResponse> getChatRoom(@PathVariable String chatRoomId) {
+        ChatRoomResponse chatRoom = chatRoomService.getChatRoom(chatRoomId);
+        return ResponseEntity.ok(chatRoom);
     }
 
     @Operation(summary = "채팅방 생성", description = "새로운 채팅방을 생성하고 친구들을 초대합니다.")
@@ -43,8 +52,10 @@ public class ChatRoomApiController {
         String userId = principalProvider.getAuthentication()
                 .getDetails()
                 .toString();
-        ChatRoom chatRoom = chatRoomService.createChatRoom(request.name(), userId, request.friendIds());
-        return ResponseEntity.ok(new ChatRoomResponse(chatRoom.getId(), chatRoom.getName()));
+
+        ChatRoomResponse chatRoom = chatRoomService.createChatRoom(request.name(), userId, request.friendIds());
+
+        return ResponseEntity.ok(chatRoom);
     }
 
 }

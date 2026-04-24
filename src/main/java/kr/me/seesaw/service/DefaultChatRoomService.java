@@ -1,6 +1,7 @@
 package kr.me.seesaw.service;
 
 import kr.me.seesaw.domain.dto.ChatRoomResponse;
+import kr.me.seesaw.domain.dto.UserResponse;
 import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.ChatRoomMember;
 import kr.me.seesaw.domain.entity.User;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class DefaultChatRoomService implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom createChatRoom(String name, String creatorId, List<String> friendIds) {
+    public ChatRoomResponse createChatRoom(String name, String creatorId, List<String> friendIds) {
         log.info("채팅방을 생성하고 친구를 초대합니다. name: {}, creatorId: {}, friendCount: {}", name, creatorId, friendIds == null ? 0 : friendIds.size());
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(name)
@@ -49,7 +51,8 @@ public class DefaultChatRoomService implements ChatRoomService {
 
         eventPublisher.publishEvent(new ChatRoomCreatedEvent(savedChatRoom.getId(), creatorId, friendIds));
 
-        return savedChatRoom;
+        return ChatRoomResponse.from(savedChatRoom)
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +83,37 @@ public class DefaultChatRoomService implements ChatRoomService {
     public List<ChatRoomResponse> getChatRoomsByUserId(String userId) {
         log.debug("유저가 속한 채팅방을 조회합니다. userId: {}", userId);
         List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByUserId(userId);
-        return chatRoomMembers.stream().map(ChatRoomMember::getChatRoom).map(chatRoom -> new ChatRoomResponse(chatRoom.getId(), chatRoom.getName())).toList();
+        return chatRoomMembers.stream()
+                .map(ChatRoomMember::getChatRoom)
+                .map(chatRoom -> ChatRoomResponse.builder()
+                        .id(chatRoom.getId())
+                        .name(chatRoom.getName())
+                        .createdBy(chatRoom.getCreatedBy())
+                        .createdDate(chatRoom.getCreatedDate())
+                        .build())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ChatRoomResponse getChatRoom(String chatRoomId) {
+        log.debug("채팅방 상세 정보를 조회합니다. chatRoomId: {}", chatRoomId);
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new NoSuchElementException("채팅방을 찾을 수 없습니다. id: " + chatRoomId));
+
+        List<String> chatRoomMemberIds = chatRoomMemberRepository.findAllByChatRoomId(chatRoomId)
+                .stream()
+                .map(ChatRoomMember::getUserId)
+                .toList();
+        List<User> users = userRepository.findAllByIdIn(chatRoomMemberIds);
+        List<UserResponse> chatRoomMembers = users.stream()
+                .map(UserResponse::from)
+                .map(UserResponse.UserResponseBuilder::build)
+                .toList();
+
+        return ChatRoomResponse.from(chatRoom)
+                .members(chatRoomMembers)
+                .build();
     }
 
 }

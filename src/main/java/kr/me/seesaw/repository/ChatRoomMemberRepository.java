@@ -12,6 +12,8 @@ public interface ChatRoomMemberRepository extends Repository<ChatRoomMember, Str
 
     List<ChatRoomMember> findAllByUserId(String userId);
 
+    List<ChatRoomMember> findAllByChatRoomId(String chatRoomId);
+
     void save(ChatRoomMember chatRoomMember);
 
 }

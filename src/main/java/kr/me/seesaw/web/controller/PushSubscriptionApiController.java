@@ -27,8 +27,8 @@ public class PushSubscriptionApiController {
     @PostMapping
     public ResponseEntity<PushSubscriptionResponse> subscribe(@Valid @RequestBody PushSubscriptionRequest request) {
         String userId = principalProvider.getAuthentication().getDetails().toString();
-        PushSubscriptionResponse response = pushSubscriptionService.subscribe(userId, request);
-        return ResponseEntity.ok(response);
+        PushSubscriptionResponse pushSubscription = pushSubscriptionService.subscribe(userId, request);
+        return ResponseEntity.ok(pushSubscription);
     }
 
     @Operation(summary = "푸시 구독 취소", description = "기존 구독 정보를 삭제합니다.")

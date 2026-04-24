@@ -9,12 +9,14 @@ public interface ChatRoomService {
 
     void createChatRoom(String name);
 
-    ChatRoom createChatRoom(String name, String creatorId, List<String> friendIds);
+    ChatRoomResponse createChatRoom(String name, String creatorId, List<String> friendIds);
 
     List<ChatRoom> getAllChatRooms();
 
     void addMember(String chatRoomId, String memberId);
 
     List<ChatRoomResponse> getChatRoomsByUserId(String userId);
+
+    ChatRoomResponse getChatRoom(String chatRoomId);
 
 }
