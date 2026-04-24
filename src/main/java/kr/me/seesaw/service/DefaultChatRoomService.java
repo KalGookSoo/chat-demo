@@ -82,6 +82,18 @@ public class DefaultChatRoomService implements ChatRoomService {
     }
 
     @Override
+    public void addMembers(String chatRoomId, List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return;
+        }
+
+        log.info("채팅방에 멤버를 일괄 추가합니다. chatRoomId: {}, 대상 수: {}", chatRoomId, memberIds.size());
+        memberIds.stream()
+                .distinct()
+                .forEach(memberId -> addMember(chatRoomId, memberId));
+    }
+
+    @Override
     public List<ChatRoomResponse> getChatRoomsByUserId(String userId) {
         log.debug("유저가 속한 채팅방을 조회합니다. userId: {}", userId);
         List<ChatRoomMember> memberships = chatRoomMemberRepository.findAllByUserId(userId);

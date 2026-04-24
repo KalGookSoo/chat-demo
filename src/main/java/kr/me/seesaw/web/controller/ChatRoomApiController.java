@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.me.seesaw.component.security.PrincipalProvider;
 import kr.me.seesaw.domain.dto.ChatRoomCreateRequest;
+import kr.me.seesaw.domain.dto.ChatRoomMemberAddRequest;
 import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,14 @@ public class ChatRoomApiController {
         ChatRoomResponse chatRoom = chatRoomService.createChatRoom(request.name(), userId, request.friendIds());
 
         return ResponseEntity.ok(chatRoom);
+    }
+
+    @Operation(summary = "채팅방 멤버 추가", description = "채팅방에 새로운 멤버를 추가합니다.")
+    @PreAuthorize("isAuthenticated() and @chatRoomContext.isMember(#chatRoomId, authentication.details)")
+    @PostMapping("/{chatRoomId}/members")
+    public ResponseEntity<Void> addMembers(@PathVariable String chatRoomId, @Valid @RequestBody ChatRoomMemberAddRequest request) {
+        chatRoomService.addMembers(chatRoomId, request.memberIds());
+        return ResponseEntity.ok().build();
     }
 
 }
