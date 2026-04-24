@@ -59,7 +59,7 @@ public class DefaultMessageService implements MessageService {
 
         return MessageResponse.builder()
                 .id(message.getId())
-                .chatRoomId(message.getChatRoomId())
+                .chatRoomId(chatRoomId)
                 .content(message.getContent())
                 .type(message.getType())
                 .mimeType(message.getMimeType())

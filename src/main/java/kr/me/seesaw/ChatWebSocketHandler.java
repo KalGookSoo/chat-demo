@@ -81,9 +81,23 @@ public class ChatWebSocketHandler extends AbstractWebSocketHandler {
 
         String userId = authentication.getDetails().toString();
 
+        Map<String, Object> payload;
+        try {
+            payload = objectMapper.readValue(textMessage.getPayload(), Map.class);
+        } catch (JsonProcessingException e) {
+            log.warn("메시지 페이로드 파싱 실패. sessionId={}, payload={}", session.getId(), textMessage.getPayload(), e);
+            return;
+        }
+
+        Object contentValue = payload.get("content");
+        if (!(contentValue instanceof String content) || content.isBlank()) {
+            log.warn("content 부재로 메시지를 처리할 수 없습니다. sessionId={}, payload={}", session.getId(), textMessage.getPayload());
+            return;
+        }
+
         // 메시지 영속화
-        MessageResponse message = messageService.createMessage(textMessage.getPayload(), userId, chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
-        String broadcastMessage = objectMapper.writeValueAsString(Map.of("message", message));
+        MessageResponse message = messageService.createMessage(content, userId, chatRoomId, MessageType.CHAT, MediaType.TEXT_PLAIN_VALUE);
+        String broadcastMessage = objectMapper.writeValueAsString(message);
         chatSessionManager.broadcastToRoom(chatRoomId, broadcastMessage);
         // TODO 서비스 워커 알림
         // TODO 채팅방에 메시지 전송
