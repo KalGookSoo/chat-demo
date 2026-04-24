@@ -67,4 +67,15 @@ public class ChatRoomApiController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "채팅방 멤버 제거", description = "채팅방에서 멤버를 제거하거나 본인이 나갑니다.")
+    @PreAuthorize("isAuthenticated() and @chatRoomContext.isMember(#chatRoomId, authentication.details)")
+    @DeleteMapping("/{chatRoomId}/members/{memberId}")
+    public ResponseEntity<Void> removeMember(@PathVariable String chatRoomId, @PathVariable String memberId) {
+        String requesterId = principalProvider.getAuthentication()
+                .getDetails()
+                .toString();
+        chatRoomService.removeMember(chatRoomId, memberId, requesterId);
+        return ResponseEntity.ok().build();
+    }
+
 }

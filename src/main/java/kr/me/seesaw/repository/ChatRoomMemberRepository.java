@@ -19,4 +19,6 @@ public interface ChatRoomMemberRepository extends Repository<ChatRoomMember, Str
 
     void save(ChatRoomMember chatRoomMember);
 
+    void delete(ChatRoomMember chatRoomMember);
+
 }

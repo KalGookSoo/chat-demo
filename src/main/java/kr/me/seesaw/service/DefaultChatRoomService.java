@@ -12,6 +12,7 @@ import kr.me.seesaw.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +92,30 @@ public class DefaultChatRoomService implements ChatRoomService {
         memberIds.stream()
                 .distinct()
                 .forEach(memberId -> addMember(chatRoomId, memberId));
+    }
+
+    @Override
+    public void removeMember(String chatRoomId, String memberId, String requesterId) {
+        log.debug("채팅방 멤버 매핑을 조회합니다. chatRoomId: {}, memberId: {}", chatRoomId, memberId);
+        ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoomId, memberId)
+                .orElseThrow(() -> new NoSuchElementException("채팅방 멤버를 찾을 수 없습니다. chatRoomId: " + chatRoomId + ", memberId: " + memberId));
+
+        if (!memberId.equals(requesterId)) {
+            log.debug("채팅방 정보를 조회하여 강제퇴장 권한을 확인합니다. chatRoomId: {}, requesterId: {}", chatRoomId, requesterId);
+            ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                    .orElseThrow(() -> new NoSuchElementException("채팅방을 찾을 수 없습니다. id: " + chatRoomId));
+
+            if (!requesterId.equals(chatRoom.getCreatedBy())) {
+                throw new AccessDeniedException("채팅방 생성자만 다른 멤버를 강제퇴장시킬 수 있습니다.");
+            }
+
+            log.info("채팅방 멤버를 강제퇴장시킵니다. chatRoomId: {}, memberId: {}, requesterId: {}", chatRoomId, memberId, requesterId);
+        } else {
+            log.info("채팅방에서 자발적으로 나갑니다. chatRoomId: {}, memberId: {}", chatRoomId, memberId);
+        }
+
+        log.info("채팅방 멤버 매핑을 삭제합니다. chatRoomId: {}, memberId: {}", chatRoomId, memberId);
+        chatRoomMemberRepository.delete(chatRoomMember);
     }
 
     @Override
