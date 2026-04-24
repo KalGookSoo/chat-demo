@@ -15,6 +15,7 @@ import java.util.Set;
 
 import static lombok.AccessLevel.PROTECTED;
 
+@Setter
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor
@@ -54,11 +55,6 @@ public class User extends BaseEntity {
     @JoinTable(name = "tb_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    public void addRole(Role role) {
-        roles.add(role);
-        role.getUsers().add(this);
-    }
-
     public static User create(String username, String password, String name) {
         User user = new User();
         user.username = username;
@@ -66,6 +62,11 @@ public class User extends BaseEntity {
         user.name = name;
         user.initializeAccountPolicy();
         return user;
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
+        role.getUsers().add(this);
     }
 
     public void changePassword(String encodedPassword) {

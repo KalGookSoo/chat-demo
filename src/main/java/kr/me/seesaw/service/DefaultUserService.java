@@ -101,4 +101,11 @@ public class DefaultUserService implements UserService {
         user.changePassword(passwordEncoder.encode(newPassword));
     }
 
+    @Override
+    public void updateProfile(String userId, String name) {
+        log.info("사용자 기본정보를 수정합니다. userId: {}", userId);
+        User user = userRepository.getReferenceById(userId);
+        user.setName(name);
+    }
+
 }

@@ -6,16 +6,12 @@ import jakarta.validation.Valid;
 import kr.me.seesaw.domain.dto.PasswordChangeRequest;
 import kr.me.seesaw.domain.dto.UserResponse;
 import kr.me.seesaw.domain.dto.UserSearch;
+import kr.me.seesaw.domain.dto.UserUpdateRequest;
 import kr.me.seesaw.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,11 +36,19 @@ public class UserApiController {
         return ResponseEntity.ok(userService.searchUsers(search));
     }
 
-    @Operation(summary = "패스워드 변경", description = "관리자/매니저 또는 본인 계정의 패스워드를 변경합니다.")
+    @Operation(summary = "패스워드 변경", description = "계정의 패스워드를 변경합니다.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or #userId == authentication.details.toString()")
     @PatchMapping("/{userId}/password")
     public ResponseEntity<Void> changePassword(@PathVariable String userId, @Valid @RequestBody PasswordChangeRequest request) {
         userService.changePassword(userId, request.newPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "사용자 기본정보 수정", description = "계정 정보를 수정합니다.")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or #userId == authentication.details.toString()")
+    @PutMapping("/{userId}")
+    public ResponseEntity<Void> updateProfile(@PathVariable String userId, @Valid @RequestBody UserUpdateRequest request) {
+        userService.updateProfile(userId, request.name());
         return ResponseEntity.ok().build();
     }
 
