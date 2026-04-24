@@ -22,7 +22,7 @@ public record MessageResponse(
         @Schema(description = "생성일시")
         LocalDateTime createdDate,
         @Schema(description = "발신자 정보")
-        SenderResponse sender
+        UserResponse sender
 ) {
 
 }

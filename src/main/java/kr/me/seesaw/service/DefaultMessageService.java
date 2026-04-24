@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
 import kr.me.seesaw.domain.dto.MessageResponse;
-import kr.me.seesaw.domain.dto.SenderResponse;
+import kr.me.seesaw.domain.dto.UserResponse;
 import kr.me.seesaw.domain.entity.BaseEntity;
 import kr.me.seesaw.domain.entity.ChatRoom;
 import kr.me.seesaw.domain.entity.Message;
@@ -40,20 +40,32 @@ public class DefaultMessageService implements MessageService {
 
     @Transactional
     @Override
-    public Message createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
+    public MessageResponse createMessage(String content, String senderId, String chatRoomId, MessageType type, String mimeType) {
         log.info("메시지 생성을 시작합니다. content: {}, senderId: {}, chatRoomId: {}, type: {}, mimeType: {}", content, senderId, chatRoomId, type, mimeType);
-        User sender = userRepository.findById(senderId).orElseThrow();
+        User user = userRepository.findById(senderId).orElseThrow();
         ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
 
         Message message = Message.builder()
                 .content(content)
-                .sender(sender)
+                .sender(user)
                 .chatRoom(chatRoom)
                 .type(type)
                 .mimeType(mimeType)
                 .build();
         messageRepository.save(message);
-        return message;
+
+        UserResponse sender = UserResponse.from(user)
+                .build();
+
+        return MessageResponse.builder()
+                .id(message.getId())
+                .chatRoomId(message.getChatRoomId())
+                .content(message.getContent())
+                .type(message.getType())
+                .mimeType(message.getMimeType())
+                .createdDate(message.getCreatedDate())
+                .sender(sender)
+                .build();
     }
 
     @Override
@@ -75,9 +87,7 @@ public class DefaultMessageService implements MessageService {
                 .sorted(Comparator.comparing(Message::getCreatedDate))
                 .map(message ->
                         {
-                            SenderResponse sender = SenderResponse.builder()
-                                    .id(message.getSenderId())
-                                    .name(users.get(message.getSenderId()).getName())
+                            UserResponse sender = UserResponse.from(users.get(message.getSenderId()))
                                     .build();
                             return MessageResponse.builder()
                                     .id(message.getId())

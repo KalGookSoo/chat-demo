@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kr.me.seesaw.ChatWebSocketHandler;
-import kr.me.seesaw.repository.MessageRepository;
 import kr.me.seesaw.service.MessageService;
-import kr.me.seesaw.service.UserService;
 import kr.me.seesaw.web.interceptor.ChatHandshakeInterceptor;
 import kr.me.seesaw.web.interceptor.JwtHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -24,24 +22,20 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final MessageService messageService;
 
-    private final UserService userService;
-
     private final ChatHandshakeInterceptor chatHandshakeInterceptor;
 
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
-    private final MessageRepository messageRepository;
-
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler(objectMapper()), "/chat")
-                .addInterceptors(chatHandshakeInterceptor, jwtHandshakeInterceptor)
+                .addInterceptors(jwtHandshakeInterceptor, chatHandshakeInterceptor)
                 .setAllowedOrigins("*");
     }
 
     @Bean
     public ChatWebSocketHandler chatWebSocketHandler(ObjectMapper objectMapper) {
-        return new ChatWebSocketHandler(messageService, userService, objectMapper, messageRepository);
+        return new ChatWebSocketHandler(messageService, objectMapper);
     }
 
     @Bean
