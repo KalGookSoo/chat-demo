@@ -57,4 +57,12 @@ public class Friend extends BaseEntity {
         return FriendStatus.PENDING.equals(status);
     }
 
+    public boolean isAccepted() {
+        return FriendStatus.ACCEPTED.equals(status);
+    }
+
+    public boolean isBlocked() {
+        return FriendStatus.BLOCKED.equals(status);
+    }
+
 }

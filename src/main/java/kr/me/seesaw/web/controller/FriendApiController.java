@@ -39,6 +39,13 @@ public class FriendApiController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "친구 차단", description = "")
+    @PutMapping("/{friendId}/block")
+    public ResponseEntity<Void> blockFriend(@PathVariable String friendId) {
+        friendService.blockFriend(friendId);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "친구 삭제/거절", description = "친구 관계를 삭제하거나 요청을 거절합니다.")
     @DeleteMapping("/{friendId}")
     public ResponseEntity<Void> removeFriend(@PathVariable String friendId) {

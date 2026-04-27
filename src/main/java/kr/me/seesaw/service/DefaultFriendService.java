@@ -128,4 +128,20 @@ public class DefaultFriendService implements FriendService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void blockFriend(String friendId) {
+        Authentication authentication = principalProvider.getAuthentication();
+        String userId = authentication.getDetails().toString();
+
+        Friend friend = friendRepository.findByUserIdAndFriendId(friendId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("친구 또는 친구 요청이 존재하지 않습니다."));
+
+        if (friend.isBlocked()) {
+            throw new IllegalArgumentException("이미 차단된 친구입니다.");
+        }
+
+        log.debug("{}가 {} 친구를 차단합니다.", authentication.getName(), friendId);
+        friend.block();
+    }
+
 }

@@ -14,4 +14,6 @@ public interface FriendService {
 
     List<FriendResponse> getFriends();
 
+    void blockFriend(String friendId);
+
 }

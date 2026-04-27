@@ -6,7 +6,9 @@ import kr.me.seesaw.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"test"})
 @RequiredArgsConstructor
 @Configuration
 public class AppInitializer implements CommandLineRunner {
