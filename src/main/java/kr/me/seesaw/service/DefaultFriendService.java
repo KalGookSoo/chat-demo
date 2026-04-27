@@ -107,25 +107,32 @@ public class DefaultFriendService implements FriendService {
                 .filter(id -> !id.equals(userId))
                 .collect(Collectors.toSet());
 
-        Map<String, User> userMap = userRepository.findAllByIdIn(friendUserIds).stream()
+        Map<String, User> userMap = userRepository.findAllByIdIn(friendUserIds)
+                .stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return friends.stream()
                 .map(f -> {
-                    String targetFriendId = f.getUserId().equals(userId) ? f.getFriendId() : f.getUserId();
+                    String requesterId = f.getCreatedBy();
+                    String targetFriendId = resolveFriendId(userId, requesterId, f.getFriendId());
                     User friendUser = userMap.get(targetFriendId);
-                    UserResponse friend = UserResponse.builder()
-                            .id(friendUser.getId())
-                            .username(friendUser.getUsername())
-                            .name(friendUser.getName())
+                    if (friendUser == null) {
+                        throw new IllegalStateException("친구 사용자 정보를 찾을 수 없습니다. id=" + targetFriendId);
+                    }
+                    UserResponse friend = UserResponse.from(friendUser)
                             .build();
                     return FriendResponse.builder()
                             .userId(userId)
+                            .requesterId(requesterId)
                             .friend(friend)
                             .status(f.getStatus())
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private String resolveFriendId(String userId, String requesterId, String friendId) {
+        return userId.equals(requesterId) ? friendId : requesterId;
     }
 
     @Override

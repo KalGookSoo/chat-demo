@@ -9,6 +9,8 @@ import lombok.Builder;
 public record FriendResponse(
         @Schema(description = "내 식별자")
         String userId,
+        @Schema(description = "요청자 식별자")
+        String requesterId,
         @Schema(description = "친구")
         UserResponse friend,
         @Schema(description = "상태")
