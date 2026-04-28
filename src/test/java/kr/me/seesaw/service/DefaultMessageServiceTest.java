@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
+import kr.me.seesaw.domain.dto.MessageResponse;
 import kr.me.seesaw.domain.entity.ChatRoom;
-import kr.me.seesaw.domain.entity.Message;
 import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.domain.vo.MessageType;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
@@ -61,11 +61,11 @@ class DefaultMessageServiceTest {
         String mimeType = MediaType.TEXT_PLAIN_VALUE;
 
         // when
-        Message message = messageService.createMessage(content, senderId, chatRoomId, type, mimeType);
+        MessageResponse message = messageService.createMessage(content, senderId, chatRoomId, type, mimeType);
         entityManager.flush();
 
         // then
-        Assertions.assertEquals(content, message.getContent());
+        Assertions.assertEquals(content, message.content());
     }
 
 }

@@ -1,9 +1,7 @@
 package kr.me.seesaw;
 
 import jakarta.persistence.EntityManager;
-import kr.me.seesaw.domain.entity.Friend;
-import kr.me.seesaw.domain.entity.Role;
-import kr.me.seesaw.domain.entity.User;
+import kr.me.seesaw.domain.entity.*;
 import kr.me.seesaw.domain.vo.FriendStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +57,30 @@ public class TestDataInitializerConfig {
                         .status(FriendStatus.ACCEPTED)
                         .build();
                 entityManager.persist(friend);
+
+                // PushDevice 초기 데이터 (user1용 Web Push)
+                PushDevice webDevice = PushDevice.builder()
+                        .user(user1)
+                        .provider(PushProvider.WEB_PUSH)
+                        .endpoint("https://fcm.googleapis.com/fcm/send/fake-endpoint")
+                        .p256dh("fake-p256dh")
+                        .auth("fake-auth")
+                        .userAgent("Mozilla/5.0")
+                        .deviceName("Chrome Desktop")
+                        .active(true)
+                        .build();
+                entityManager.persist(webDevice);
+
+                // PushDevice 초기 데이터 (user1용 Expo Push)
+                PushDevice expoDevice = PushDevice.builder()
+                        .user(user1)
+                        .provider(PushProvider.EXPO)
+                        .pushToken("ExponentPushToken[fake-token]")
+                        .userAgent("iOS")
+                        .deviceName("iPhone 15")
+                        .active(true)
+                        .build();
+                entityManager.persist(expoDevice);
 
                 LOGGER.info("테스트 데이터 초기화 완료");
             }

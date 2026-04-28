@@ -1,7 +1,7 @@
 package kr.me.seesaw.service;
 
 import kr.me.seesaw.TestDataInitializerConfig;
-import kr.me.seesaw.domain.entity.ChatRoom;
+import kr.me.seesaw.domain.dto.ChatRoomResponse;
 import kr.me.seesaw.domain.entity.ChatRoomMember;
 import kr.me.seesaw.domain.entity.User;
 import kr.me.seesaw.repository.ChatRoomMemberRepository;
@@ -46,19 +46,19 @@ class DefaultChatRoomServiceTest {
         List<String> friendIds = List.of(friend.getId(), notFriend.getId());
 
         // when
-        ChatRoom chatRoom = chatRoomService.createChatRoom(chatRoomName, creator.getId(), friendIds);
+        ChatRoomResponse chatRoom = chatRoomService.createChatRoom(chatRoomName, creator.getId(), friendIds);
 
         // then
-        assertThat(chatRoom.getName()).isEqualTo(chatRoomName);
+        assertThat(chatRoom.name()).isEqualTo(chatRoomName);
 
         // 멤버 확인
-        Optional<ChatRoomMember> creatorMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoom.getId(), creator.getId());
+        Optional<ChatRoomMember> creatorMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoom.id(), creator.getId());
         assertThat(creatorMember).isPresent();
 
-        Optional<ChatRoomMember> friendMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoom.getId(), friend.getId());
+        Optional<ChatRoomMember> friendMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoom.id(), friend.getId());
         assertThat(friendMember).isPresent();
 
-        Optional<ChatRoomMember> notFriendMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoom.getId(), notFriend.getId());
+        Optional<ChatRoomMember> notFriendMember = chatRoomMemberRepository.findByChatRoomIdAndUserId(chatRoom.id(), notFriend.getId());
         assertThat(notFriendMember).isEmpty(); // user3은 user1과 친구가 아니므로 초대되지 않아야 함
     }
 
