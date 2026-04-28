@@ -10,6 +10,7 @@ import kr.me.seesaw.service.PushDeviceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,28 +29,29 @@ public class PushDeviceApiController {
 
     @Operation(summary = "푸시 기기 등록/갱신", description = "PWA 또는 Expo 앱의 푸시 정보를 등록합니다.")
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PushDeviceResponse register(@RequestBody @Valid PushDeviceRegisterRequest request) {
+    public ResponseEntity<PushDeviceResponse> register(@RequestBody @Valid PushDeviceRegisterRequest request) {
         Authentication authentication = principalProvider.getAuthentication();
         String userId = authentication.getDetails().toString();
-        return pushDeviceService.registerDevice(userId, request);
+        PushDeviceResponse pushDevice = pushDeviceService.registerDevice(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pushDevice);
     }
 
     @Operation(summary = "내 푸시 기기 목록 조회")
     @GetMapping("/me")
-    public List<PushDeviceResponse> getMyDevices() {
+    public ResponseEntity<List<PushDeviceResponse>> getMyDevices() {
         Authentication authentication = principalProvider.getAuthentication();
         String userId = authentication.getDetails().toString();
-        return pushDeviceService.getMyDevices(userId);
+        List<PushDeviceResponse> myDevices = pushDeviceService.getMyDevices(userId);
+        return ResponseEntity.ok(myDevices);
     }
 
     @Operation(summary = "푸시 기기 등록 해제")
     @DeleteMapping("/{deviceId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unregister(@PathVariable String deviceId) {
+    public ResponseEntity<Void> unregister(@PathVariable String deviceId) {
         Authentication authentication = principalProvider.getAuthentication();
         String userId = authentication.getDetails().toString();
         pushDeviceService.unregisterDevice(userId, deviceId);
+        return ResponseEntity.noContent().build();
     }
 
 }
